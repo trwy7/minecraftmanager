@@ -38,8 +38,26 @@ When the app is first started, you need to agree to the Minecraft EULA, then a v
 The directories (as in the manager container) are:
 
 - `/servers` # Contains server data and configurations
-  - `/<UUID>` # Per server data
+  - `/<ID>` # Per server data
     - `/server.jar` # Server jar file, should not be relied on existing, as some server softwares are not java. Instead, use run.sh to start the server
     - `/run.sh` # The entrypoint for a server
 - `/data` # Contains manager configuration
   - `/db.sqlite3` # The app database
+
+### Authentication
+
+Authentication will be handled by OpenID. This allows login methods like google, discord, and many others. Because there are no permissions, on a user's first login, a code will be printed to console, and will need to be typed in.
+
+### DB structure
+
+- User
+  - UUID
+  - Name
+- Server
+  - ID
+  - Type (one of proxy, lobby, or )
+
+#### Server id structure
+
+Each server ID follows the structure 30xxx, except for the proxy, which uses 25565.
+The server ID is used as the server port. The 0 in each ID can be changed for plugin usage, e.x. server on port 30001, and vc on 31001.
