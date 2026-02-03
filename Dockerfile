@@ -42,9 +42,16 @@ RUN mkdir -p /usr/lib/jvm
 COPY --from=java8 /opt/java/openjdk /usr/lib/jvm/java-8-temurin
 COPY --from=java17 /opt/java/openjdk /usr/lib/jvm/java-17-temurin
 COPY --from=java21 /opt/java/openjdk /usr/lib/jvm/java-21-temurin
+
+# Alias java
 RUN ln -s /usr/lib/jvm/java-8-temurin/bin/java /usr/bin/java8 && \
     ln -s /usr/lib/jvm/java-17-temurin/bin/java /usr/bin/java17 && \
     ln -s /usr/lib/jvm/java-21-temurin/bin/java /usr/bin/java21
+
+# Make sure they work
+RUN java8 -version
+RUN java17 -version
+RUN java21 -version
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
