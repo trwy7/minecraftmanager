@@ -75,5 +75,6 @@ USER appuser
 EXPOSE 7843
 
 # Run the application using exec form (JSON array) so signals are delivered properly.
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["waitress-serve", "--host=0.0.0.0", "--port=7843", "app:app"]
 # CMD ["gunicorn", "--bind", "0.0.0.0:7842", "-w", "4", "app:app"]Z
