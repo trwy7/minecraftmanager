@@ -34,6 +34,8 @@ When the app is first started, you need to agree to the Minecraft EULA, then a v
   - Serves the app
 - Requests
   - Download server software
+- mcstatus
+  - Get the player count of a server
 
 ## Directories
 

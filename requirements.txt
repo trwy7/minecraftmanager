@@ -4,3 +4,4 @@ flask-sqlalchemy
 flask-migrate
 waitress
 requests
+mcstatus
