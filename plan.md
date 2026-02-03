@@ -15,6 +15,10 @@ The app is run in a docker container, and runs each server alongside itself, in 
   - `/paper` # Another example
     - `/create.sh` # Finds the latest paper release for a specific minecraft version, and downloads it
 
+### Server creation
+
+`/create.sh` may use other server directories to generate it's own, some plugins require configuration from the proxy, which is available at /servers/25565 in the container.
+
 ### First start
 
 When the app is first started, you need to agree to the Minecraft EULA, then a velocity proxy (from /serverconfigs/proxy/create.sh) is created, started to generate config files, then shut down.
@@ -59,7 +63,9 @@ Authentication will be handled by OpenID. This allows login methods like google,
   - Name
 - Server
   - ID
-  - Type (one of proxy, lobby, or )
+  - Name
+  - Stop command
+  - Type (one of proxy, lobby, or game)
 
 #### Server id structure
 
