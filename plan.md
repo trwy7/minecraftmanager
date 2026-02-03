@@ -30,6 +30,11 @@ When the app is first started, you need to agree to the Minecraft EULA, then a v
 
 ## Directories
 
-The app will store data in /var/mcserv, including the db, which is /var/mcserv/data.sqlite3
-There will be a user (mcserv) that will run the application, and should own the /var/mcserv directory and have read permission for /etc/mcserv.yml
-Servers will be in /var/mcserv/servers/\<UUID\> and will be mounted to /server within server containers.
+The directories (as in the manager container) are:
+
+- `/servers` # Contains server data and configurations
+  - `/<UUID>` # Per server data
+    - `/server.jar` # Server jar file, does not need to exist, as run.sh is used as the entrypoint
+    - `/run.sh` # The entrypoint for a server
+- `/conf` # Contains manager configuration
+  - `/db.sqlite3` # The app database
