@@ -1,0 +1,15 @@
+services:
+  minecraftmanager:
+    build:
+      context: .
+    ports:
+      - 7843:7843 # HTTP
+    volumes:
+      - trwy_mcm_servers:/servers
+      - trwy_mcm_data:/data
+    restart: always
+    hostname: minecraftmanager
+    stop_signal: SIGINT
+volumes:
+  trwy_mcm_servers:
+  trwy_mcm_data:

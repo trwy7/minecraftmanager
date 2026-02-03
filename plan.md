@@ -27,6 +27,11 @@ When the app is first started, you need to agree to the Minecraft EULA, then a v
   - Used for realtime logs and communication, could probably also provide api access somehow
 - Flask-SQLAlchemy
   - Provides easy SQLite access for interacting with the DB like a python class
+- Flask-Migrate
+  - Provides db migration features
+  - TODO: See if I can make this automatic on container start
+- Waitress
+  - Serves the app
 
 ## Directories
 
@@ -34,7 +39,7 @@ The directories (as in the manager container) are:
 
 - `/servers` # Contains server data and configurations
   - `/<UUID>` # Per server data
-    - `/server.jar` # Server jar file, does not need to exist, as run.sh is used as the entrypoint
+    - `/server.jar` # Server jar file, should not be relied on existing, as some server softwares are not java. Instead, use run.sh to start the server
     - `/run.sh` # The entrypoint for a server
-- `/conf` # Contains manager configuration
+- `/data` # Contains manager configuration
   - `/db.sqlite3` # The app database
