@@ -6,8 +6,11 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-ARG PYTHON_VERSION=3.13.1
-FROM python:${PYTHON_VERSION}-slim as base
+FROM eclipse-temurin:8-jre AS java8
+FROM eclipse-temurin:17-jre AS java17
+FROM eclipse-temurin:21-jre AS java21
+
+FROM python:3.13.1-slim as base
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -32,6 +35,16 @@ RUN adduser \
     --no-create-home \
     --uid "${UID}" \
     appuser
+
+# Install java
+RUN mkdir -p /usr/lib/jvm
+
+COPY --from=java8 /opt/java/openjdk /usr/lib/jvm/java-8-temurin
+COPY --from=java17 /opt/java/openjdk /usr/lib/jvm/java-17-temurin
+COPY --from=java21 /opt/java/openjdk /usr/lib/jvm/java-21-temurin
+RUN ln -s /usr/lib/jvm/java-8-temurin/bin/java /usr/bin/java8 && \
+    ln -s /usr/lib/jvm/java-17-temurin/bin/java /usr/bin/java17 && \
+    ln -s /usr/lib/jvm/java-21-temurin/bin/java /usr/bin/java21
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.

@@ -11,9 +11,9 @@ The app is run in a docker container, and runs each server alongside itself, in 
 - `/app` # Flask app, like html, css, and everything else.
 - `/serverconfigs` # Server configurations
   - `/vanilla` # A vanilla server
-    - `/create.sh` # Contains setup data, installs jre and downloads the vanilla server to server.jar to the server directory, also sets up the start.sh script
+    - `/create.sh` # Contains setup data, downloads the vanilla server to server.jar to the server directory, also sets up the start.sh script
   - `/paper` # Another example
-    - `/create.sh` # Installs jre, finds the latest paper release for a specific minecraft version, and downloads it
+    - `/create.sh` # Finds the latest paper release for a specific minecraft version, and downloads it
 
 ### First start
 
