@@ -32,6 +32,8 @@ When the app is first started, you need to agree to the Minecraft EULA, then a v
   - TODO: See if I can make this automatic on container start
 - Waitress
   - Serves the app
+- Requests
+  - Download server software
 
 ## Directories
 
