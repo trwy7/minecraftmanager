@@ -5,3 +5,4 @@ flask-migrate
 waitress
 requests
 mcstatus
+pyjwt

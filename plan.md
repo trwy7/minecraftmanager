@@ -40,6 +40,8 @@ When the app is first started, you need to agree to the Minecraft EULA, then a v
   - Download server software
 - mcstatus
   - Get the player count of a server
+- pyjwt
+  - Gives auth tokens to users
 
 ## Directories
 
@@ -54,7 +56,7 @@ The directories (as in the manager container) are:
 
 ### Authentication
 
-Authentication will be handled by OpenID. This allows login methods like google, discord, and many others. Because there are no permissions, on a user's first login, a code will be printed to console, and will need to be typed in.
+Authentication will be handled by OpenID. This allows login methods like google, discord, and many others. Because there are no permissions, on a user's first login, a code will be printed to console, and will need to be typed in. The user will be given a jwt token to use for authentication.
 
 ### DB structure
 
