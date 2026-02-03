@@ -16,6 +16,9 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # the application crashes without emitting any logs due to buffering.
 ENV PYTHONUNBUFFERED=1
 
+# Tell the app we are in docker
+ENV IN_DOCKER=True
+
 WORKDIR /app
 
 # Create a non-privileged user that the app will run under.
