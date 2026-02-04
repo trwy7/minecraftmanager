@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Applying db migrations..."
-flask db upgrade
+echo "Fixing permissions..."
+chown -R 1000:1000 /servers /data
 
-echo "Starting app..."
-exec "$@"
+echo "Starting user script..."
+exec su -c "/app/entrypoint.user.sh $*" appuser

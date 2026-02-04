@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCManager - {% block title required %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/index.css">
+    <script src="/static/index.js" defer></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div id="loadOverlay" style="background-color:#111; position:absolute; top:0px; left:0px; width:100%; height:100%; z-index:2000;"></div>
+    {% if noheader != true %}
+    <header id="header">
+        <div id="header-left">testleft</div>
+        <div id="header-center">testcenter</div>
+        <div id="header-right">testright</div>
+    </header>
+    {% endif %}
+    <main id="{% block mainid %}unknownmain{% endblock %}" class="{% block mainclasses %}{% endblock %}">
+        {% block content required %}{% endblock %}
+    </main>
+    {% block script %}{% endblock %}
+</body>
+</html>

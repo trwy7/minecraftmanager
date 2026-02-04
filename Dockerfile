@@ -31,7 +31,7 @@ RUN adduser \
     --disabled-password \
     --gecos "" \
     --home "/nonexistent" \
-    --shell "/sbin/nologin" \
+    --shell "/bin/bash" \
     --no-create-home \
     --uid "${UID}" \
     appuser
@@ -62,14 +62,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
-# Switch to the non-privileged user to run the application.
-USER appuser
-
 # Copy the source code into the container.
 COPY . .
 
 # Switch back to the non-privileged user.
-USER appuser
+#USER appuser # Now done in entrypoint
 
 # Expose the port that the application listens on.
 EXPOSE 7843

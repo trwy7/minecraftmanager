@@ -1,16 +1,21 @@
 import os
+import functools
 import importlib
 import jwt
 from flask import Flask, request, redirect
+from flask_limiter import Limiter
+from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="pages", static_folder="static")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/db.sqlite3'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "ChangeM3P13ase")
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+limiter = Limiter(app=app, key_func=lambda: request.remote_addr, default_limits=["100/minute", "5/second"], storage_uri="memory://")
+socketio = SocketIO(app)
 
 @app.before_request
 def verify_user():
@@ -30,16 +35,18 @@ def verify_user():
         pass
 
 def require_login(func):
-    def wrapper():
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
         if request.user:
-            return func()
+            return func(*args, **kwargs)
         return redirect("/login")
     return wrapper
 
 def require_no_login(func):
-    def wrapper():
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
         if not request.user:
-            return func()
+            return func(*args, **kwargs)
         return redirect("/dashboard")
     return wrapper
 
@@ -61,6 +68,9 @@ class Server(db.Model):
     name = db.Column(db.String(30), nullable=False)
     stop_cmd = db.Column(db.String(30), nullable=False)
     type = db.Column(db.String(5), nullable=False)
+
+with app.app_context():
+    db.create_all()
 
 # Import routes
 if os.environ.get("IN_DOCKER"):

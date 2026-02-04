@@ -214,3 +214,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# App data
+docker-compose.override.yml
+servers/
+data/

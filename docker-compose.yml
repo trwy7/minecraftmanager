@@ -5,11 +5,12 @@ services:
     ports:
       - 7843:7843 # HTTP
     volumes:
-      - trwy_mcm_servers:/servers
-      - trwy_mcm_data:/data
+      - servers:/servers
+      - data:/data
     restart: unless-stopped
     hostname: minecraftmanager
     stop_signal: SIGINT
+    env_file: ".env"
 volumes:
-  trwy_mcm_servers:
-  trwy_mcm_data:
+  servers:
+  data:
