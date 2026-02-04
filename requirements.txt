@@ -6,3 +6,5 @@ waitress
 requests
 mcstatus
 pyjwt
+flask-bcrypt
+flask-limiter

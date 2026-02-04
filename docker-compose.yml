@@ -7,7 +7,7 @@ services:
     volumes:
       - trwy_mcm_servers:/servers
       - trwy_mcm_data:/data
-    restart: always
+    restart: unless-stopped
     hostname: minecraftmanager
     stop_signal: SIGINT
 volumes:

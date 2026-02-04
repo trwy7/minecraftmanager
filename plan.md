@@ -42,6 +42,10 @@ When the app is first started, you need to agree to the Minecraft EULA, then a v
   - Get the player count of a server
 - pyjwt
   - Gives auth tokens to users
+- flask-bcrypt
+  - Password hash provider
+- flask-limiter
+  - Rate limiter
 
 ## Directories
 
@@ -56,7 +60,9 @@ The directories (as in the manager container) are:
 
 ### Authentication
 
-Authentication will be handled by OpenID. This allows login methods like google, discord, and many others. Because there are no permissions, on a user's first login, a code will be printed to console, and will need to be typed in. The user will be given a jwt token to use for authentication.
+The user will be given a jwt token to use for authentication.
+Passwords are hashed with bcrypt.
+When a user wants to sign up, we print a message in console, rate limited to 2 per hour across the whole app. If the user can get a code from the console, they are allowed to make their account, if 3 failed attempts happen, a new code must be made
 
 ### DB structure
 
