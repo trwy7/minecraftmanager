@@ -7,6 +7,7 @@ from flask_limiter import Limiter
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__, template_folder="pages", static_folder="static")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/db.sqlite3'
@@ -16,6 +17,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 limiter = Limiter(app=app, key_func=lambda: request.remote_addr, default_limits=["100/minute", "5/second"], storage_uri="memory://")
 socketio = SocketIO(app)
+bcrypt = Bcrypt(app)
 
 @app.before_request
 def verify_user():
@@ -30,7 +32,10 @@ def verify_user():
     if not token:
         return
     try:
-        jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")
+        cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")['usr']
+        usr = get_user(cusr)
+        if usr:
+            request.user = usr
     except jwt.exceptions.InvalidSignatureError:
         pass
 
@@ -55,13 +60,26 @@ def require_no_login(func):
 def index():
     return redirect("/dashboard")
 
+def check_password(phash: str, password: str):
+    return bcrypt.check_password_hash(phash, password)
+
+def get_user(uid):
+    return User.query.filter_by(id=uid).first()
+
+def get_user_count():
+    return User.query.count()
+
+def create_user(uid, password):
+    user = User(id=uid, password=bcrypt.generate_password_hash(password).decode('utf-8'))
+    db.session.add(user)
+    db.session.commit()
+    return user
+
 class User(db.Model):
     id = db.Column(db.String(255), primary_key=True, unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     def generate_token(self):
         return jwt.encode({"usr": self.id}, app.config['SECRET_KEY'], algorithm="HS256")
-    def get_user(self, uid):
-        return User.query.filter_by(id=uid).first()
 
 class Server(db.Model):
     id = db.Column(db.String(255), primary_key=True, unique=True, nullable=False)

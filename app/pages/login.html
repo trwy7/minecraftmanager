@@ -1,0 +1,14 @@
+{% extends "templates/base.html" %}
+{% block title %}Login{% endblock %}
+{% block mainid %}loginpage{% endblock %}
+{% block mainclasses %}centered{% endblock %}
+{% block content %}
+<form method="POST">
+    <label for="id">Username:</label><br>
+    <input type="text" id="id" name="id"><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password"><br><br>
+    <input type="submit" value="Submit">
+</form>
+<p id="error">{{error}}</p>
+{% endblock %}
