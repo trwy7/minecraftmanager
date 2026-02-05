@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCManager - {% block title required %}{% endblock %}</title>
     <link rel="stylesheet" href="/static/index.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
     <script src="/static/index.js" defer></script>
     {% block head %}{% endblock %}
 </head>
@@ -12,9 +13,13 @@
     <div id="loadOverlay" style="background-color:#111; position:absolute; top:0px; left:0px; width:100%; height:100%; z-index:2000;"></div>
     {% if noheader != true %}
     <header id="header">
-        <div id="header-left">testleft</div>
-        <div id="header-center">testcenter</div>
-        <div id="header-right">testright</div>
+        <div id="header-left">
+            <a href="/dashboard" id="home-button" class="header-button">Home</a>
+        </div>
+        <div id="header-center">center placeholder</div>
+        <div id="header-right">
+            <a href="/logout" id="logout-button" class="header-button">Logout</a>
+        </div>
     </header>
     {% endif %}
     <main id="{% block mainid %}unknownmain{% endblock %}" class="{% block mainclasses %}{% endblock %}">

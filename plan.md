@@ -4,14 +4,14 @@ This document contains what my current plans are for this project. This is chang
 
 ## Backend
 
-The app is run in a docker container, and runs each server alongside itself, in `/servers/<uuid>`, with the executable being server.jar, and the entrypoint as start.sh
+The app is run in a docker container, and runs each server alongside itself, in `/servers/<uuid>`
 
 ### Source code structure
 
 - `/app` # Flask app, like html, css, and everything else.
 - `/serverconfigs` # Server configurations
   - `/vanilla` # A vanilla server
-    - `/create.sh` # Contains setup data, downloads the vanilla server to server.jar to the server directory, also sets up the start.sh script
+    - `/create.sh` # Contains setup data, downloads the vanilla server to server.jar to the server directory, also sets up the run.sh script
   - `/paper` # Another example
     - `/create.sh` # Finds the latest paper release for a specific minecraft version, and downloads it
 
@@ -31,9 +31,6 @@ When the app is first started, you need to agree to the Minecraft EULA, then a v
   - Used for realtime logs and communication, could probably also provide api access somehow
 - Flask-SQLAlchemy
   - Provides easy SQLite access for interacting with the DB like a python class
-- Flask-Migrate
-  - Provides db migration features
-  - TODO: See if I can make this automatic on container start
 - Waitress
   - Serves the app
 - Requests
@@ -74,6 +71,7 @@ When a user wants to sign up, we print a message in console, rate limited to 2 p
   - Name
   - Stop command
   - Type (one of proxy, lobby, or game)
+  - Stype (one of proxy, vanilla, paper, fabric, etc)
 
 #### Server id structure
 

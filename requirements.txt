@@ -1,10 +1,10 @@
 flask
 flask-socketio
 flask-sqlalchemy
-flask-migrate
 waitress
 requests
 mcstatus
 pyjwt
 flask-bcrypt
 flask-limiter
+rcon

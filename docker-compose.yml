@@ -4,13 +4,19 @@ services:
       context: .
     ports:
       - 7843:7843 # HTTP
+      - 25565:25565 # Minecraft
+      - 25565:25565/udp # Minecraft
+      - 31000:31000 # FIXME: remove in prod
+      - 26565:26565 # FIXME: remove in prod
     volumes:
       - servers:/servers
       - data:/data
-    restart: unless-stopped
+    environment:
+      - IN_DOCKER=True
     hostname: minecraftmanager
     stop_signal: SIGINT
     env_file: ".env"
+    stop_grace_period: 60s
 volumes:
   servers:
   data:

@@ -53,6 +53,13 @@ RUN java8 -version
 RUN java17 -version
 RUN java21 -version
 
+# Script requirements
+
+RUN apt-get update && \
+    apt-get install -y curl jq openssl sudo && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
 # Leverage a bind mount to requirements.txt to avoid having to copy them into
@@ -73,5 +80,5 @@ EXPOSE 7843
 
 # Run the application using exec form (JSON array) so signals are delivered properly.
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["waitress-serve", "--host=0.0.0.0", "--port=7843", "app:app"]
-# CMD ["gunicorn", "--bind", "0.0.0.0:7842", "-w", "4", "app:app"]Z
+#CMD ["waitress-serve", "--host=0.0.0.0", "--port=7843", "app:app"]
+CMD ["python3", "-u", "-m", "app"]

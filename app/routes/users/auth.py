@@ -31,3 +31,9 @@ def login_post():
     resp = redirect("/dashboard")
     resp.set_cookie("token", token, httponly=True, samesite="Lax")
     return resp
+
+@app.route("/logout")
+def logout():
+    resp = redirect("/login")
+    resp.set_cookie("token", "", expires=0)
+    return resp
