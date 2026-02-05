@@ -11,5 +11,5 @@ then
 fi
 git clone https://github.com/trwy7/minecraftmanager
 cd minecraftmanager
-echo "SECRET_KEY=d3MoK3yD0notUsEinProdUcTiONReAlLYLongStRiNg" > .env
+cp .env.example .env
 docker compose up --build

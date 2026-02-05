@@ -7,6 +7,8 @@ import threading
 import subprocess
 import time
 import signal
+import re
+import toml
 import jwt
 from flask import Flask, request, redirect
 from flask_limiter import Limiter
@@ -19,6 +21,7 @@ from rcon.exceptions import EmptyResponse
 app = Flask(__name__, template_folder="pages", static_folder="static")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/db.sqlite3'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "ChangeM3P13ase")
+app.config['SERVER_OWNER'] = os.environ.get('SERVER_OWNER')
 
 db = SQLAlchemy(app)
 limiter = Limiter(app=app, key_func=lambda: request.remote_addr, default_limits=["100/minute", "5/second"], storage_uri="memory://")
@@ -126,13 +129,19 @@ def run_server(server):
         with open(log_path, "wb") as f:
             for line in iter(proc.stdout.readline, b""):
                 #print(f"[{server.name}] {line.decode()}", end="")
-                #socketio.emit("server_output", {"server_id": server.id, "output": line.decode()})
+                send_update("server_output", {"server_id": server.id, "output": line.decode()})
+                if not server_states.get(sid, {}).get("fully_started"):
+                    if re.search(rb"Done \(.+?\)!", line):
+                        server_states.setdefault(sid, {})["fully_started"] = True
+                        send_update("server_fully_started", {"server_id": server.id})
                 f.write(line)
                 f.flush()
             f.write(b"[mcm] Server process ended.\n")
         proc.wait()
         # clear the proc when finished
         server_states.setdefault(sid, {})["proc"] = None
+        server_states.setdefault(sid, {})["fully_started"] = False
+        send_update("server_stopped", {"server_id": server.id})
 
 def start_server(server):
     """Start the server in a background thread if not already running."""
@@ -143,7 +152,25 @@ def start_server(server):
         return True
     thread = threading.Thread(target=run_server, daemon=True, args=(server,))
     server_states.setdefault(sid, {})["thread"] = thread
+    server_states.setdefault(sid, {})["fully_started"] = False
+    if server.type == "proxy":
+        print(f"Server {server.name} is a proxy, updating config.")
+        if os.path.exists(f"/servers/{server.id}/velocity.toml"):
+            with open(f"/servers/{server.id}/velocity.toml", "r") as f:
+                config = toml.load(f)
+            config["player-info-forwarding-mode"] = "modern"
+            config["servers"] = {}
+            config["forced-hosts"] = {}
+            for qserver in Server.query.filter(Server.type != "proxy").all():
+                config["servers"][qserver.name] = "127.0.0.1:" + str(qserver.id)
+                if os.environ.get("BASE_DOMAIN"):
+                    print(f"Adding forced-hosts config for {qserver.name} with domain {qserver.name + '.' + os.environ['BASE_DOMAIN']}")
+                    config["forced-hosts"][qserver.name + "." + os.environ["BASE_DOMAIN"]] = qserver.name
+            config["servers"]['try'] = ["lobby"]
+            with open(f"/servers/{server.id}/velocity.toml", "w") as f:
+                toml.dump(config, f)
     thread.start()
+    send_update("server_started", {"server_id": server.id})
     return thread
 
 def run_command(server, command):
@@ -192,6 +219,12 @@ def stop_server(server):
 # End AI disclosure
 
 def create_server(sid, name, stop_cmd, stype, software_type, version="latest", force_create=False):
+    # Name has to be lowercase letters
+    name = name.strip().lower()
+    # Replace spaces with dashes
+    name = name.replace(" ", "-")
+    # Remove any characters that are not lowercase letters, numbers, or dashes
+    name = "".join(c for c in name if (c.isalnum() and not c.isdigit()) or c == "-")
     if os.path.exists(f"/servers/{sid}"):
         if not force_create:
             raise Exception("Server already exists")
@@ -201,11 +234,30 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
     cresp = os.system(f"cd /servers/{sid} && /app/serverconfigs/{software_type}/create.sh {sid} {version}")
     if cresp != 0:
         raise Exception("Failed to create server")
-    print("Server created.")
+    print("Server created. Running initial setup...")
     server = Server(id=sid, name=name, stop_cmd=stop_cmd, type=stype)
     db.session.add(server)
     db.session.commit()
+    start_server(server)
+    while not server_states.get(sid, {}).get("fully_started"):
+        if not server_states.get(sid, {}).get("thread") or not server_states[sid]["thread"].is_alive():
+            print("Server failed to start.")
+            raise Exception("Server failed to start after creation")
+        time.sleep(1)
+    # Server on configuration here
+    if app.config['SERVER_OWNER']:
+        if stype == "proxy":
+            run_command(server, "lpv user " + app.config['SERVER_OWNER'] + " permission set * true")
+        else:
+            run_command(server, "lp user " + app.config['SERVER_OWNER'] + " permission set * true")
+    stop_server(server)
+    # TODO: Add the server to the proxy configuration and run velocity reload
     return server
+
+authenticated_clients = []
+def send_update(event, data):
+    for sid in authenticated_clients:
+        socketio.emit(event, data, to=sid)
 
 class User(db.Model):
     id = db.Column(db.String(255), primary_key=True, unique=True, nullable=False)
@@ -228,9 +280,9 @@ with app.app_context():
     print("Checking for existing servers...")
     if Server.query.count() == 0:
         print("No servers found, creating default proxy and lobby servers...")
-        create_server(
+        proxy = create_server(
             25565,
-            "Proxy",
+            "proxy",
             "shutdown",
             "proxy",
             "proxy",
@@ -239,7 +291,7 @@ with app.app_context():
         )
         create_server(
             30000,
-            "Lobby",
+            "lobby",
             "stop",
             "lobby",
             "paper",
@@ -265,28 +317,30 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-@socketio.on("stop_server")
-def handle_stop_server(data):
-    server = Server.query.filter_by(id=data["server_id"]).first()
-    if not server:
-        return
-    success = stop_server(server)
-    socketio.emit("stop_response", {"server_id": server.id, "success": success})
-
 @socketio.on("connect")
 def handle_connect(auth):
     token = auth.get("token") if auth else None
     if not token:
+        print("No auth token provided, rejecting SocketIO connection")
         return False
     try:
         cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")['usr']
         usr = get_user(cusr)
         if not usr:
+            print("Invalid user in token, rejecting SocketIO connection")
             return False
         print(f"User {usr.id} connected via SocketIO")
+        authenticated_clients.append(request.sid)
+        socketio.emit("auth_success", {"message": "Authenticated successfully"}, to=request.sid)
         return True
     except jwt.exceptions.InvalidSignatureError:
         return False
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    print(f"Client {request.sid} disconnected from SocketIO")
+    if request.sid in authenticated_clients:
+        authenticated_clients.remove(request.sid)
 
 # Import routes
 for root, _, files in os.walk("app/routes"):

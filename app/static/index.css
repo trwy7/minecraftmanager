@@ -2,9 +2,11 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
+    background-color: rgb(31, 33, 33);
+    color: white;
 }
 #header {
-    background-color: #2c3e50;
+    background-color: #515151;
     color: white;
     padding: 10px;
     position: relative;
@@ -16,4 +18,43 @@ body {
 #header #header-right {
     display: flex;
     align-items: center; /* center vertically */
+}
+#header a {
+    color: white;
+    text-decoration: none;
+    margin-right: 15px;
+}
+#header a:hover {
+    text-decoration: underline;
+}
+main.centered, main:has(form) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+input[type="text"], input[type="password"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+}
+input[type="submit"] {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+input[type="submit"]:hover {
+    background-color: #45a049;
+}
+main {
+    padding: 5px 20px;
 }

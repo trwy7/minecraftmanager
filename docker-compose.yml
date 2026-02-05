@@ -9,8 +9,6 @@ services:
     volumes:
       - servers:/servers
       - data:/data
-    environment:
-      - IN_DOCKER=True
     hostname: minecraftmanager
     stop_signal: SIGINT
     env_file: ".env"

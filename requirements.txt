@@ -8,3 +8,4 @@ pyjwt
 flask-bcrypt
 flask-limiter
 rcon
+toml

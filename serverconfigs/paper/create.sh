@@ -69,6 +69,7 @@ enable-rcon=true
 rcon.port=$RCON_PORT
 rcon.password=mcmanager
 enforce-secure-profile=false
+online-mode=false
 EOF
 #server-ip=127.0.0.1
 
@@ -91,6 +92,16 @@ proxies:
     online-mode: true
     secret: '$FORWARD_SECRET'
 EOF
+
+# Install plugins
+echo "Installing plugins..."
+mkdir -p plugins/voicechat
+/app/serverconfigs/modrinthdownload.sh "luckperms" "paper" "$MINECRAFT_VERSION" "plugins/luckperms.jar"
+/app/serverconfigs/modrinthdownload.sh "simple-voice-chat" "paper" "$MINECRAFT_VERSION" "plugins/simple-voice-chat.jar"
+
+# Create voicechat config
+VOICE_PORT=$(($1 + 100))
+echo "port=$VOICE_PORT" > plugins/voicechat/voicechat-server.properties
 
 # Create run.sh
 echo "Creating run.sh..."

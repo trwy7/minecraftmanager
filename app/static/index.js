@@ -5,12 +5,7 @@ function getCookie(name) {
 }
 
 const token = getCookie("token");
-if (token) {
-    var socket = io({
-        withCredentials: true,
-        auth: { token: token }
-    });
-    socket.on('connect', function() {
-        socket.emit('my event', {data: 'I\'m connected!'});
-    });
-}
+var socket = io({
+    withCredentials: true,
+    auth: { token: token }
+});
