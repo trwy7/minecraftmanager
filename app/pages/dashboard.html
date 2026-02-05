@@ -3,4 +3,9 @@
 {% block mainid %}dashboard{% endblock %}
 {% block content %}
 <h1>Dashboard</h1>
+<ul>
+    {% for server, data in servers.items() %}
+        <li>{{server.name}}: {% if is_server_running(server) %}Running{% else %}Stopped{% endif %}</li>
+    {% endfor %}
+</ul>
 {% endblock %}

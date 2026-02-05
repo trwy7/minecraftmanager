@@ -29,7 +29,7 @@ def login_post():
         return render_template("login.html", error="Invalid username or password.")
     token = usr.generate_token()
     resp = redirect("/dashboard")
-    resp.set_cookie("token", token, httponly=True, samesite="Lax")
+    resp.set_cookie("token", token, samesite="Lax")
     return resp
 
 @app.route("/logout")

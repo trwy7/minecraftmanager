@@ -16,18 +16,13 @@ from flask_bcrypt import Bcrypt
 from rcon.source import Client
 from rcon.exceptions import EmptyResponse
 
-print("Importing routes...")
 app = Flask(__name__, template_folder="pages", static_folder="static")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/db.sqlite3'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "ChangeM3P13ase")
 
-print("init db")
 db = SQLAlchemy(app)
-print("init limiter")
 limiter = Limiter(app=app, key_func=lambda: request.remote_addr, default_limits=["100/minute", "5/second"], storage_uri="memory://")
-#print("init socketio")
-#socketio = SocketIO(app)
-print("init bcrypt")
+socketio = SocketIO(app, cors_allowed_origins="*")
 bcrypt = Bcrypt(app)
 
 print("This app requires that you agree to the Minecraft EULA. If you do not, please remove the app and related files.")
@@ -88,6 +83,16 @@ def create_user(uid, password):
     db.session.add(user)
     db.session.commit()
     return user
+
+def get_next_free_server_id():
+    existing_ids = {server.id for server in Server.query.all()}
+    for i in range(30001, 30100):
+        if i not in existing_ids:
+            return i
+    raise Exception("No free server IDs available")
+
+def get_servers():
+    return {server: server_states.get(server.id, {}) for server in Server.query.all()}
 
 # AI disclosure
 # AI and a lot of manual debugging ahead
@@ -241,13 +246,12 @@ with app.app_context():
             "1.21.10",
             force_create=True
         )
-    # Start lobby and proxy servers
-    proxy_server = Server.query.filter_by(type="proxy").first()
-    lobby_server = Server.query.filter_by(type="lobby").first()
-    # If these dont exist, we just let it error out
-    start_server(proxy_server)
-    start_server(lobby_server)
-    print("Servers started.")
+    # Start all servers
+    print("Starting servers...")
+    for server in Server.query.all():
+        print(f"Starting server {server.name}...")
+        start_server(server)
+        print(f"Server {server.name} started.")
 
 def signal_handler(sig, frame):
     print("Stopping servers...")
@@ -260,6 +264,29 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
+
+@socketio.on("stop_server")
+def handle_stop_server(data):
+    server = Server.query.filter_by(id=data["server_id"]).first()
+    if not server:
+        return
+    success = stop_server(server)
+    socketio.emit("stop_response", {"server_id": server.id, "success": success})
+
+@socketio.on("connect")
+def handle_connect(auth):
+    token = auth.get("token") if auth else None
+    if not token:
+        return False
+    try:
+        cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")['usr']
+        usr = get_user(cusr)
+        if not usr:
+            return False
+        print(f"User {usr.id} connected via SocketIO")
+        return True
+    except jwt.exceptions.InvalidSignatureError:
+        return False
 
 # Import routes
 for root, _, files in os.walk("app/routes"):
