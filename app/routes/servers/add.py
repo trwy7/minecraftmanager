@@ -10,16 +10,12 @@ def add_server():
 @app.route("/addserver", methods=['POST'])
 @require_login
 def add_server_post():
-    threading.Thread(
-        target=create_server,
-        args=(
-            get_next_free_server_id(),
-            request.form['name'],
-            "stop",
-            "game",
-            request.form['type'],
-            request.form['version'],
-        ),
-        daemon=True
-    ).start()
+    create_server(
+        get_next_free_server_id(),
+        request.form['name'],
+        "stop",
+        "game",
+        request.form['type'],
+        request.form['version'],
+    )
     return redirect("/dashboard")

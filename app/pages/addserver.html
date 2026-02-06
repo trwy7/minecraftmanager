@@ -2,6 +2,7 @@
 {% block title %}Add server{% endblock %}
 {% block mainid %}addserver{% endblock %}
 {% block content %}
+<p>This may time out, or take a minute or two. Just let it run and don't refresh the page. If this times out, check the console logs.</p>
 <form method="POST">
     <label for="name">Server name:</label><br>
     <input type="text" id="name" name="name" placeholder="Server name" onkeydown="return /[a-z\-]/i.test(event.key)" required><br>

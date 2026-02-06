@@ -119,6 +119,24 @@ def run_command(server, command):
             return None
     return response
 
+def update_proxy_config(server):
+    if os.path.exists(f"/servers/{server.id}/velocity.toml"):
+        with open(f"/servers/{server.id}/velocity.toml", "r") as f:
+            config = toml.load(f)
+        config["player-info-forwarding-mode"] = "modern"
+        config["servers"] = {}
+        config["forced-hosts"] = {}
+        for qserver in Server.query.filter(Server.type != "proxy").all():
+            config["servers"][qserver.name] = "127.0.0.1:" + str(qserver.id)
+            if os.environ.get("BASE_DOMAIN"):
+                print(f"Adding forced-hosts config for {qserver.name} with domain {qserver.name + '.' + os.environ['BASE_DOMAIN']}")
+                config["forced-hosts"][qserver.name + "." + os.environ["BASE_DOMAIN"]] = qserver.name
+        config["servers"]['try'] = ["lobby"]
+        with open(f"/servers/{server.id}/velocity.toml", "w") as f:
+            toml.dump(config, f)
+        if is_server_running(server):
+            run_command(server, "velocity reload")
+
 # AI disclosure
 # AI and a lot of manual debugging ahead
 
@@ -179,20 +197,7 @@ def start_server(server):
     server_states.setdefault(sid, {})["fully_started"] = False
     if server.type == "proxy":
         print(f"Server {server.name} is a proxy, updating config.")
-        if os.path.exists(f"/servers/{server.id}/velocity.toml"):
-            with open(f"/servers/{server.id}/velocity.toml", "r") as f:
-                config = toml.load(f)
-            config["player-info-forwarding-mode"] = "modern"
-            config["servers"] = {}
-            config["forced-hosts"] = {}
-            for qserver in Server.query.filter(Server.type != "proxy").all():
-                config["servers"][qserver.name] = "127.0.0.1:" + str(qserver.id)
-                if os.environ.get("BASE_DOMAIN"):
-                    print(f"Adding forced-hosts config for {qserver.name} with domain {qserver.name + '.' + os.environ['BASE_DOMAIN']}")
-                    config["forced-hosts"][qserver.name + "." + os.environ["BASE_DOMAIN"]] = qserver.name
-            config["servers"]['try'] = ["lobby"]
-            with open(f"/servers/{server.id}/velocity.toml", "w") as f:
-                toml.dump(config, f)
+        update_proxy_config(server)
     thread.start()
     if len(authenticated_clients) != 0:
         send_update("server_started", {"server_id": server.id})
@@ -248,6 +253,7 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
             print("Server failed to start.")
             raise Exception("Server failed to start after creation")
         time.sleep(1)
+    time.sleep(1)
     # Server on configuration here
     if app.config['SERVER_OWNER']:
         if stype == "proxy":
@@ -255,8 +261,9 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
         else:
             rs = run_command(server, "lp user " + app.config['SERVER_OWNER'] + " permission set * true")
         print(rs)
+    time.sleep(1)
     stop_server(server)
-    # TODO: Add the server to the proxy configuration and run velocity reload
+    update_proxy_config(Server.query.filter_by(id=25565).first())
     return server
 
 authenticated_clients = []

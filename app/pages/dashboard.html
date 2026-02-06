@@ -2,7 +2,7 @@
 {% block title %}Dashboard{% endblock %}
 {% block mainid %}dashboard{% endblock %}
 {% block content %}
-<h1>Dashboard</h1><button onclick="location.href='/addserver'">Add server</button>
+<h1>Dashboard</h1><button onclick="location.href='/addserver'">Add server</button><br>
 <div id="serverlist">
     {% for server, data in servers.items() %}
         <div id="server-{{server.id}}">
