@@ -60,8 +60,9 @@ fi
 mkdir -p plugins/velocircon
 curl -o plugins/velocircon.jar -H "User-Agent: $USER_AGENT" https://cdn.modrinth.com/data/KkmSfl3v/versions/fSM522rY/Velocircon-1.0.5.jar
 curl -o plugins/simple-voice-chat.jar -H "User-Agent: $USER_AGENT" https://cdn.modrinth.com/data/9eGKb6K1/versions/jMopHMDQ/voicechat-velocity-2.6.4.jar
-/app/serverconfigs/modrinthdownload.sh "luckperms" "velocity" "$MINECRAFT_VERSION" "plugins/luckperms.jar"
-
+/app/serverconfigs/modrinthdownload.sh "luckperms" "velocity" "1.20.1" "plugins/luckperms.jar"
+/app/serverconfigs/modrinthdownload.sh "velocitab" "velocity" "1.20.1" "plugins/velocitab.jar"
+cp -r /app/serverconfigs/proxy/velocitab plugins/velocitab
 # Create Velocircon config
 cat << 'EOF' > plugins/velocircon/rcon.yml
 enable: true

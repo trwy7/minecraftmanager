@@ -58,3 +58,56 @@ input[type="submit"]:hover {
 main {
     padding: 5px 20px;
 }
+/* the actual dashboard styling */
+#serverlist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+#serverlist > div {
+    background-color: #515151;
+    padding: 10px;
+    border-radius: 4px;
+    width: 100%;
+}
+.server-console {
+    background-color: #333;
+    padding: 10px;
+    height: 150px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+.server-action-buttons button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    margin-right: 5px;
+}
+button.start-server {
+    background-color: #4CAF50;
+}
+button.start-server:hover {
+    background-color: #45a049;
+}
+button.stop-server {
+    background-color: #f44336;
+}
+button.stop-server:hover {
+    background-color: #da190b;
+}
+button.restart-server {
+    background-color: #008CBA;
+}
+button.restart-server:hover {
+    background-color: #007bb5;
+}
+button.run-command {
+    background-color: #009e6e;
+}
+button.run-command:hover {
+    background-color: #007b5e;
+}

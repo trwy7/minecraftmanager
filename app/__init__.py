@@ -1,3 +1,6 @@
+# pylint: disable=missing-function-docstring, missing-class-docstring, wrong-import-position, wrong-import-order
+from gevent import monkey
+monkey.patch_all()
 import os
 import sys
 import functools
@@ -12,7 +15,7 @@ import toml
 import jwt
 from flask import Flask, request, redirect
 from flask_limiter import Limiter
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from rcon.source import Client
@@ -97,6 +100,27 @@ def get_next_free_server_id():
 def get_servers():
     return {server: server_states.get(server.id, {}) for server in Server.query.all()}
 
+def get_server_status(server):
+    return {
+        "running": is_server_running(server),
+        "fully_started": server_states.get(server.id, {}).get("fully_started", False)
+    }
+
+def run_command(server, command):
+    print(f"Running command '{command}' on '{server.name}'...")
+    if not is_server_running(server):
+        return None
+    with Client('127.0.0.1', server.id + 1000, passwd='mcmanager') as client:
+        try:
+            response = client.run(*command.split(" "))
+        except EmptyResponse:
+            # why does this not just return none by default
+            response = None
+        except ConnectionRefusedError:
+            print(f"Failed to connect to server {server.name} for command '{command}'. RCON is likely not initialized yet.")
+            return None
+    return response
+
 # AI disclosure
 # AI and a lot of manual debugging ahead
 
@@ -129,7 +153,8 @@ def run_server(server):
         with open(log_path, "wb") as f:
             for line in iter(proc.stdout.readline, b""):
                 #print(f"[{server.name}] {line.decode()}", end="")
-                send_update("server_output", {"server_id": server.id, "output": line.decode()})
+                if len(authenticated_clients) != 0:
+                    send_update("server_output", {"server_id": server.id, "output": line.decode()})
                 if not server_states.get(sid, {}).get("fully_started"):
                     if re.search(rb"Done \(.+?\)!", line):
                         server_states.setdefault(sid, {})["fully_started"] = True
@@ -141,7 +166,8 @@ def run_server(server):
         # clear the proc when finished
         server_states.setdefault(sid, {})["proc"] = None
         server_states.setdefault(sid, {})["fully_started"] = False
-        send_update("server_stopped", {"server_id": server.id})
+        if len(authenticated_clients) != 0:
+            send_update("server_stopped", {"server_id": server.id})
 
 def start_server(server):
     """Start the server in a background thread if not already running."""
@@ -170,25 +196,9 @@ def start_server(server):
             with open(f"/servers/{server.id}/velocity.toml", "w") as f:
                 toml.dump(config, f)
     thread.start()
-    send_update("server_started", {"server_id": server.id})
+    if len(authenticated_clients) != 0:
+        send_update("server_started", {"server_id": server.id})
     return thread
-
-def run_command(server, command):
-    """Run an RCON command on the server and return its response."""
-    print(f"Running command '{command}' on server '{server.name}'...")
-    if not is_server_running(server):
-        print(f"Server {server.name} is not running, cannot run command '{command}'")
-        return None
-    with Client('127.0.0.1', server.id + 1000, passwd='mcmanager') as client:
-        try:
-            response = client.run(*command.split(" "))
-        except EmptyResponse:
-            response = None
-        except ConnectionRefusedError:
-            print(f"Failed to connect to server {server.name} for command '{command}'. RCON is likely not initialized yet.")
-            return None
-    print(f"Ran command '{command}' on server '{server.name}' with response: {response}")
-    return response
 
 def stop_server(server):
     """Stop the server gracefully, killing it if necessary."""
@@ -207,11 +217,9 @@ def stop_server(server):
             pass
     thread = server_states.get(sid, {}).get("thread")
     if thread and thread.is_alive():
-        print(f"Server {server.name} did not stop gracefully, killing process...")
         if proc:
+            print(f"Server {server.name} did not stop gracefully, killing process...")
             proc.kill()
-    if thread and thread.is_alive():
-        return False
     server_states.setdefault(sid, {})["proc"] = None
     server_states.setdefault(sid, {})["thread"] = None
     return True
@@ -256,8 +264,11 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
 
 authenticated_clients = []
 def send_update(event, data):
-    for sid in authenticated_clients:
-        socketio.emit(event, data, to=sid)
+    if len(authenticated_clients) == 0:
+        return
+    with app.app_context():
+        for sid in authenticated_clients:
+            emit(event, data, broadcast=True, include_self=True, namespace="/", to=sid)
 
 class User(db.Model):
     id = db.Column(db.String(255), primary_key=True, unique=True, nullable=False)
@@ -305,18 +316,6 @@ with app.app_context():
         start_server(server)
         print(f"Server {server.name} started.")
 
-def signal_handler(sig, frame):
-    print("Stopping servers...")
-    with app.app_context():
-        for qserver in Server.query.all():
-            print(f"Stopping server {qserver.name}...")
-            stop_server(qserver)
-            print(f"Server {qserver.name} stopped.")
-    print("All servers stopped.")
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, signal_handler)
-
 @socketio.on("connect")
 def handle_connect(auth):
     token = auth.get("token") if auth else None
@@ -332,7 +331,6 @@ def handle_connect(auth):
         print(f"User {usr.id} connected via SocketIO")
         authenticated_clients.append(request.sid)
         socketio.emit("auth_success", {"message": "Authenticated successfully"}, to=request.sid)
-        return True
     except jwt.exceptions.InvalidSignatureError:
         return False
 
