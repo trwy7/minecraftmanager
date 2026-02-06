@@ -281,6 +281,8 @@ class User(db.Model):
         return jwt.encode({"usr": self.id}, app.config['SECRET_KEY'], algorithm="HS256")
 
 class Server(db.Model):
+    # TODO: File browser
+    # FIXME: docker compose down kills the server processes
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
     name = db.Column(db.String(30), unique=True, nullable=False)
     stop_cmd = db.Column(db.String(30), nullable=False)
@@ -289,6 +291,7 @@ class Server(db.Model):
     proc = None
 
 class Plugin(db.Model):
+    # TODO: Plugin browser and installer
     id = db.Column(db.Text, primary_key=True, unique=True, nullable=False) # source+id, e.x. "modrinth+P7dR8mSH"
     name = db.Column(db.String(50), unique=True, nullable=False)
     version = db.Column(db.String(20), nullable=False)
