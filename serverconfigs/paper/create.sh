@@ -96,8 +96,12 @@ EOF
 # Install plugins
 echo "Installing plugins..."
 mkdir -p plugins/voicechat
+mkdir -p plugins/floodgate
 /app/serverconfigs/modrinthdownload.sh "luckperms" "paper" "$MINECRAFT_VERSION" "plugins/luckperms.jar"
 /app/serverconfigs/modrinthdownload.sh "simple-voice-chat" "paper" "$MINECRAFT_VERSION" "plugins/simple-voice-chat.jar"
+/app/serverconfigs/modrinthdownload.sh "viaversion" "paper" "$MINECRAFT_VERSION" "plugins/viaversion.jar"
+/app/serverconfigs/modrinthdownload.sh "viabackwards" "paper" "$MINECRAFT_VERSION" "plugins/viabackwards.jar"
+/app/serverconfigs/modrinthdownload.sh "viarewind" "paper" "$MINECRAFT_VERSION" "plugins/viarewind.jar"
 curl -o plugins/floodgate.jar -LH "User-Agent: $USER_AGENT" https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
 cp /servers/25565/plugins/floodgate/key.pem plugins/floodgate/key.pem
 
