@@ -1,6 +1,18 @@
 # Simple Minecraft Manager
 
-Simple Minecraft Manager is a server manager for Minecraft. This is designed from the ground up to be as simple to set up as possible. This is designed for use with a friend group, not massive networks.
+Simple Minecraft Manager is a server manager for Minecraft. This is designed from the ground up to be as simple to set up as possible. This is designed for use with a friend group that requires more than one server, but still wants an easy to use solution.
+
+## How to use
+
+When starting your server for the first time, check the console for `Created initial 'admin' user with password`, and log in at localhost:7843 (or whatever your port is set to).
+By default, a proxy and a lobby (papermc) server is created. These servers cannot be deleted, but new servers may be added very easily:
+
+- Click add server
+- Select a name, server software, and game version
+- Wait 1 minute
+- Add plugins
+- Start your server
+- Players may join with `/server <name>`, no restart needed
 
 ## Included plugins
 
