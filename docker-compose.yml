@@ -6,6 +6,7 @@ services:
       - 7843:7843 # HTTP
       - 25565:25565 # Minecraft
       - 25565:25565/udp # Minecraft
+      - 19132:19132/udp # Bedrock/Geyser
     volumes:
       - servers:/servers
       - data:/data

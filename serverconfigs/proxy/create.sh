@@ -58,8 +58,12 @@ fi
 
 # Download plugins
 mkdir -p plugins/velocircon
+mkdir -p plugins/Geyser-Velocity
+mkdir -p plugins/floodgate
 curl -o plugins/velocircon.jar -H "User-Agent: $USER_AGENT" https://cdn.modrinth.com/data/KkmSfl3v/versions/fSM522rY/Velocircon-1.0.5.jar
 curl -o plugins/simple-voice-chat.jar -H "User-Agent: $USER_AGENT" https://cdn.modrinth.com/data/9eGKb6K1/versions/jMopHMDQ/voicechat-velocity-2.6.4.jar
+curl -o plugins/geyser.jar -LH "User-Agent: $USER_AGENT" https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/velocity
+curl -o plugins/floodgate.jar -LH "User-Agent: $USER_AGENT" https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/velocity
 /app/serverconfigs/modrinthdownload.sh "luckperms" "velocity" "1.20.1" "plugins/luckperms.jar"
 /app/serverconfigs/modrinthdownload.sh "velocitab" "velocity" "1.20.1" "plugins/velocitab.jar"
 cp -r /app/serverconfigs/proxy/velocitab plugins/velocitab
@@ -78,6 +82,14 @@ permissions:
   regex:
     enable: false
     regex: minecraft\.(.*)
+EOF
+# Geyser config
+cat << 'EOF' > plugins/Geyser-Velocity/config.yml
+java:
+  auth-type: floodgate
+EOF
+cat << 'EOF' > plugins/floodgate/config.yml
+send-floodgate-data: true
 EOF
 
 # Create forwarding secret
