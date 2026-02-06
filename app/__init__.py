@@ -2,14 +2,12 @@
 from gevent import monkey
 monkey.patch_all()
 import os
-import sys
 import functools
 import importlib
 import shutil
 import threading
 import subprocess
 import time
-import signal
 import re
 import toml
 import jwt
@@ -277,7 +275,7 @@ class User(db.Model):
 
 class Server(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
-    name = db.Column(db.String(30), nullable=False)
+    name = db.Column(db.String(30), unique=True, nullable=False)
     stop_cmd = db.Column(db.String(30), nullable=False)
     type = db.Column(db.String(5), nullable=False)
     thread = None

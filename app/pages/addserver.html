@@ -1,0 +1,19 @@
+{% extends "templates/base.html" %}
+{% block title %}Add server{% endblock %}
+{% block mainid %}addserver{% endblock %}
+{% block content %}
+<form method="POST">
+    <label for="name">Server name:</label><br>
+    <input type="text" id="name" name="name" placeholder="Server name" onkeydown="return /[a-z\-]/i.test(event.key)" required><br>
+    <label for="type">Server software</label><br>
+    <select id="type" name="type" required>
+        <option value="" disabled selected>Server software</option>
+        <option value="paper">Paper</option>
+        <option value="fabric">Fabric</option>
+    </select><br>
+    <label for="version">Version:</label><br>
+    <input type="text" id="version" name="version" placeholder="1.x.x" required><br>
+    <button type="submit">Submit</button>
+</form>
+<p id="error">{{error}}</p>
+{% endblock %}
