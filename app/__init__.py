@@ -320,11 +320,21 @@ with app.app_context():
             force_create=True
         )
     # Start all servers
-    print("Starting servers...")
-    for server in Server.query.all():
-        print(f"Starting server {server.name}...")
-        start_server(server)
-        print(f"Server {server.name} started.")
+
+def start_all_servers():
+    with app.app_context():
+        print("Starting all servers...")
+        for server in Server.query.all():
+            print(f"Starting server {server.name}...")
+            start_server(server)
+            while not server_states.get(server.id, {}).get("fully_started"):
+                if not server_states.get(server.id, {}).get("thread") or not server_states[server.id]["thread"].is_alive():
+                    print(f"Server {server.name} failed to start.")
+                    break
+                time.sleep(1)
+            print(f"Server {server.name} started.")
+
+threading.Thread(target=start_all_servers, daemon=True).start()
 
 @socketio.on("connect")
 def handle_connect(auth):
