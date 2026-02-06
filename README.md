@@ -2,6 +2,10 @@
 
 Simple Minecraft Manager is a server manager for Minecraft. This is designed from the ground up to be as simple to set up as possible. This is designed for use with a friend group that requires more than one server, but still wants an easy to use solution.
 
+## Requirements
+
+The java minecraft server has high memory requirements. By default, 6 GB of ram is required for the proxy and papermc lobby, but increases with plugins/mods/quantity of servers.
+
 ## How to use
 
 When starting your server for the first time, check the console for `Created initial 'admin' user with password`, and log in at localhost:7843 (or whatever your port is set to).
