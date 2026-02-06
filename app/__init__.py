@@ -211,10 +211,8 @@ def stop_server(server):
     print(f"Sending stop command to server {server.name}...")
     run_command(server, server.stop_cmd)
     if proc:
-        try:
-            proc.wait(timeout=60)
-        except Exception:
-            pass
+        proc.wait(timeout=60)
+    socketio.sleep(1)
     thread = server_states.get(sid, {}).get("thread")
     if thread and thread.is_alive():
         if proc:
@@ -255,9 +253,10 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
     # Server on configuration here
     if app.config['SERVER_OWNER']:
         if stype == "proxy":
-            run_command(server, "lpv user " + app.config['SERVER_OWNER'] + " permission set * true")
+            rs = run_command(server, "lpv user " + app.config['SERVER_OWNER'] + " permission set * true")
         else:
-            run_command(server, "lp user " + app.config['SERVER_OWNER'] + " permission set * true")
+            rs = run_command(server, "lp user " + app.config['SERVER_OWNER'] + " permission set * true")
+        print(rs)
     stop_server(server)
     # TODO: Add the server to the proxy configuration and run velocity reload
     return server
