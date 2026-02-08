@@ -64,6 +64,8 @@
         console.log("Server started:", data);
         serverStatus[data.server_id] = {running: true, fully_started: false};
         document.querySelector(`#server-${data.server_id} .start-server`).hidden = true;
+        const consoleDiv = document.querySelector(`#server-${data.server_id} .server-console`);
+        consoleDiv.textContent = "";
     });
     socket.on("server_stopped", (data) => {
         console.log("Server stopped:", data);
