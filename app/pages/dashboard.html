@@ -76,13 +76,10 @@
     socket.on("server_output", (data) => {
         console.log("Server output:", data);
         const consoleDiv = document.querySelector(`#server-${data.server_id} .server-console`);
-        if (consoleDiv) {
-            // Check if scroll is at the bottom before appending new output
-            const isAtBottom = consoleDiv.scrollHeight - consoleDiv.clientHeight <= consoleDiv.scroll
-            consoleDiv.textContent += data.output;
-            if (isAtBottom) {
-                consoleDiv.scrollTop = consoleDiv.scrollHeight - consoleDiv.clientHeight;
-            }
+        const isAtBottom = consoleDiv.scrollHeight - consoleDiv.clientHeight <= consoleDiv.scrollTop + 1;
+        consoleDiv.textContent += data.output;
+        if (isAtBottom) {
+            consoleDiv.scrollTop = consoleDiv.scrollHeight - consoleDiv.clientHeight;
         }
     });
     socket.on("server_fully_started", (data) => {
