@@ -73,7 +73,7 @@ enable: true
 host: 0.0.0.0
 port: 26565
 password: mcmanager
-colors: true
+colors: false
 console-output: true
 permissions:
   luck-perms:
