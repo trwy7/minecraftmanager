@@ -18,6 +18,8 @@ By default, a proxy and a lobby (papermc) server is created. These servers canno
 - Start your server
 - Players may join with `/server <name>`, no restart needed
 
+This project is designed to be forked, and for the user to add their own configurations.
+
 ## Included plugins
 
 A list of each bundled plugin

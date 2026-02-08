@@ -93,7 +93,7 @@ def get_next_free_server_id():
     for i in range(30001, 30100):
         if i not in existing_ids:
             return i
-    raise Exception("No free server IDs available")
+    raise Exception("No free server IDs available") # if you have more than 100 servers, use pterodactyl
 
 def get_servers():
     return {server: server_states.get(server.id, {}) for server in Server.query.all()}

@@ -1,6 +1,5 @@
 from app import app, create_server, get_next_free_server_id, require_login
 from flask import request, render_template, redirect
-import threading
 
 @app.route("/addserver")
 @require_login
