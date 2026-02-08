@@ -290,13 +290,6 @@ class Server(db.Model):
     thread = None
     proc = None
 
-class Plugin(db.Model):
-    # TODO: Plugin browser and installer
-    id = db.Column(db.Text, primary_key=True, unique=True, nullable=False) # source+id, e.x. "modrinth+P7dR8mSH"
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    version = db.Column(db.String(20), nullable=False)
-    path = db.Column(db.String(255), nullable=False)
-
 with app.app_context():
     print("Initializing database...")
     db.create_all()
