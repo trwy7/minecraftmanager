@@ -24,3 +24,9 @@ socket.on("disconnect", () => {
     document.getElementById("header-center").innerText = "Disconnected";
     document.getElementById("header-center").style.color = "#e35252";
 });
+window.addEventListener('pageshow', function(event) {
+    // why is this not simpler
+    if (event.persisted) {
+        window.location.reload();
+    }
+});

@@ -52,6 +52,13 @@ def verify_user():
     except jwt.exceptions.InvalidSignatureError:
         pass
 
+@app.after_request
+def prevent_caching(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 def require_login(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
