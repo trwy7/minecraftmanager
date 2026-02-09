@@ -79,6 +79,9 @@ main {
     border-radius: 4px;
     margin-bottom: 10px;
 }
+#server .server-console {
+    height: 450px;
+}
 .server-action-buttons {
     background-color: #808080;
     padding: 10px;
