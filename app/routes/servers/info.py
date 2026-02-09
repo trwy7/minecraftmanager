@@ -1,5 +1,5 @@
-from app import app, Server, require_login, get_server_status
 from flask import render_template
+from app import app, Server, require_login, get_server_status
 
 @app.route('/server/<int:server_id>', methods=['GET'])
 @require_login
