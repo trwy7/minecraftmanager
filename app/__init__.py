@@ -268,10 +268,10 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
 
 def delete_server(server):
     stop_server(server)
-    db.session.delete(server)
-    db.session.commit()
     if os.path.exists(f"/servers/{server.id}"):
         shutil.rmtree(f"/servers/{server.id}")
+    db.session.delete(server)
+    db.session.commit()
     update_proxy_config(Server.query.filter_by(id=25565).first())
 
 authenticated_clients = []
