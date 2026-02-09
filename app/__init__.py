@@ -1,7 +1,8 @@
 # pylint: disable=missing-function-docstring, missing-class-docstring, wrong-import-position, wrong-import-order
-from gevent import monkey
+from gevent import monkey, signal_handler
 monkey.patch_all()
 import os
+import sys
 import functools
 import importlib
 import shutil
@@ -11,6 +12,7 @@ import time
 import re
 import toml
 import jwt
+import signal
 from flask import Flask, request, redirect
 from flask_limiter import Limiter
 from flask_socketio import SocketIO, emit
@@ -297,7 +299,6 @@ class User(db.Model):
 
 class Server(db.Model):
     # TODO: File browser
-    # FIXME: docker compose down kills the server processes
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
     name = db.Column(db.String(30), unique=True, nullable=False)
     stop_cmd = db.Column(db.String(30), nullable=False)
@@ -346,6 +347,27 @@ def start_all_servers():
             print(f"Server {server.name} started.")
 
 threading.Thread(target=start_all_servers, daemon=True).start()
+
+def stop_all_servers():
+    with app.app_context():
+        print("Stopping all servers...")
+        for server in Server.query.all():
+            # Start stopping all servers
+            print(f"Stopping server {server.name}...")
+            stop_server(server)
+        for server in Server.query.all():
+            # Wait for all servers to stop before exiting
+            while is_server_running(server):
+                time.sleep(1)
+            print(f"Server {server.name} stopped.")
+
+def stop_signal_handler():
+    print("Received shutdown signal, stopping all servers...")
+    stop_all_servers() # Docker should kill this process after 60 seconds if there is a non responding server
+    print("All servers stopped. Exiting.")
+    sys.exit(0)
+
+signal_handler(signal.SIGINT, stop_signal_handler)
 
 @socketio.on("connect")
 def handle_connect(auth):
