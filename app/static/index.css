@@ -19,12 +19,12 @@ body {
     display: flex;
     align-items: center; /* center vertically */
 }
-#header a {
+#header a, .serverlink {
     color: white;
     text-decoration: none;
     margin-right: 15px;
 }
-#header a:hover {
+#header a:hover, .serverlink:hover {
     text-decoration: underline;
 }
 main.centered, main:has(form) {

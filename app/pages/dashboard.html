@@ -8,7 +8,7 @@
         <div id="server-{{server.id}}">
             {% set init_status = get_server_status(server) %}
             <meta name="server-{{server.id}}-init-status" content="{{init_status.running}}-{{init_status.fully_started}}">
-            <h2>{{server.name}}</h2><br>
+            <h2><a href="/server/{{server.id}}" class="serverlink">{{server.name}}</a></h2><br>
             <div class="server-console"></div>
             <div class="server-action-buttons">
                 <button class="start-server" onclick="socket.emit('start_server', {'server_id': {{server.id}}})">Start</button>
@@ -22,18 +22,7 @@
 {% endblock %}
 {% block script %}
 <script>
-    function getCookie(name) {
-        let value = "; " + document.cookie;
-        let parts = value.split("; " + name + "=");
-        if (parts.length === 2) return parts.pop().split(";").shift();
-    }
-
-    const token = getCookie("token");
-    var socket = io({
-        auth: { token: token }
-    });
     var serverStatus = {};
-    let cdc = false;
     // there was probably a better way to do this
     document.querySelectorAll("meta[name^='server-'][name$='-init-status']").forEach(meta => {
         const serverId = meta.name.slice(7, -12);
@@ -48,17 +37,6 @@
             }
         }
         console.log(`Initial status of server ${serverId}: ${meta.content}`);
-    });
-    socket.on("connect", () => {
-        console.log("Connected to server");
-        if (cdc) {
-            // sloppy way of doing it, should probably just re-request the status of all servers
-            location.reload();
-        }
-    });
-    socket.on("disconnect", () => {
-        console.log("Disconnected from server");
-        cdc = true;
     });
     socket.on("server_started", (data) => {
         console.log("Server started:", data);
