@@ -79,6 +79,12 @@ main {
     border-radius: 4px;
     margin-bottom: 10px;
 }
+.server-action-buttons {
+    background-color: #808080;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
 button {
     padding: 5px 10px;
     border: none;
