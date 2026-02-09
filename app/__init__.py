@@ -266,6 +266,14 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
     update_proxy_config(Server.query.filter_by(id=25565).first())
     return server
 
+def delete_server(server):
+    stop_server(server)
+    db.session.delete(server)
+    db.session.commit()
+    if os.path.exists(f"/servers/{server.id}"):
+        shutil.rmtree(f"/servers/{server.id}")
+    update_proxy_config(Server.query.filter_by(id=25565).first())
+
 authenticated_clients = []
 def send_update(event, data):
     if len(authenticated_clients) == 0:
@@ -293,7 +301,7 @@ class Server(db.Model):
 with app.app_context():
     print("Initializing database...")
     db.create_all()
-    # Check if any servers exist, if not create a proxy
+    # Check if any servers exist, if not, create a proxy
     print("Checking for existing servers...")
     if Server.query.count() == 0:
         print("No servers found, creating default proxy and lobby servers...")
