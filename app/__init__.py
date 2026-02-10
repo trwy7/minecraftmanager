@@ -359,15 +359,16 @@ threading.Thread(target=start_all_servers, daemon=True).start()
 def stop_all_servers():
     with app.app_context():
         print("Stopping all servers...")
+        tlist = []
         for server in Server.query.all():
             # Start stopping all servers
             print(f"Stopping server {server.name}...")
-            stop_server(server)
-        for server in Server.query.all():
-            # Wait for all servers to stop before exiting
-            while is_server_running(server):
-                time.sleep(1)
-            print(f"Server {server.name} stopped.")
+            t = threading.Thread(target=stop_server, args=(server,), daemon=True)
+            t.start()
+            tlist.append(t)
+        for t in tlist:
+            t.join()
+        print("All servers stopped.")
 
 def stop_signal_handler():
     print("Received shutdown signal, stopping all servers...")
