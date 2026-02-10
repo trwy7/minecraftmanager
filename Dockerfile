@@ -70,7 +70,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install -r requirements.txt
 
 # Copy the source code into the container.
-COPY . .
+COPY --chown=appuser:appuser . /app
 
 # Switch back to the non-privileged user.
 #USER appuser # Now done in entrypoint

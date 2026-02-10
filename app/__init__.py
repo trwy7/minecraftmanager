@@ -25,6 +25,9 @@ app = Flask(__name__, template_folder="pages", static_folder="static")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/db.sqlite3'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "ChangeM3P13ase")
 app.config['SERVER_OWNER'] = os.environ.get('SERVER_OWNER')
+if os.environ.get('ENV_MODE') == "dev":
+    print("Running in dev mode, enabling auto reload")
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 db = SQLAlchemy(app)
 limiter = Limiter(app=app, key_func=lambda: request.remote_addr, default_limits=["100/minute", "5/second"], storage_uri="memory://")
