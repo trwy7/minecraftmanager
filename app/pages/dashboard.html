@@ -9,7 +9,7 @@
             {% set init_status = get_server_status(server) %}
             <meta name="server-{{server.id}}-init-status" content="{{init_status.running}}-{{init_status.fully_started}}">
             <h2><a href="/server/{{server.id}}" class="serverlink">{{server.name}}</a></h2><br>
-            <div class="server-console"></div>
+            <div class="server-console">{{get_server_output(server)}}</div>
             <div class="server-action-buttons">
                 <button class="start-server" onclick="socket.emit('start_server', {'server_id': {{server.id}}})">Start</button>
                 <button class="stop-server" onclick="socket.emit('stop_server', {'server_id': {{server.id}}})" hidden>Stop</button>

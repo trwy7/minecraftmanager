@@ -9,7 +9,7 @@
     <button class="restart-server" onclick="socket.emit('restart_server', {'server_id': serverId})" hidden>Restart</button>
     <button class="run-command" onclick="runCommand()" hidden>Run Command</button>
 </div>
-<div class="server-console"></div>
+<div class="server-console">{{get_server_output(server)}}</div>
 {% endblock %}
 {% block script %}
 <script>
