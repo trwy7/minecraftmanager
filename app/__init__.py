@@ -113,6 +113,14 @@ def get_server_status(server):
         "fully_started": server_states.get(server.id, {}).get("fully_started", False)
     }
 
+def get_server_output(server, tail=100):
+    log_path = f"/servers/{server.id}/output.log"
+    if not os.path.exists(log_path):
+        return ""
+    with open(log_path, "r") as f:
+        lines = f.readlines()
+        return "".join(lines[-tail:])
+
 def run_command(server, command):
     print(f"Running command '{command}' on '{server.name}'...")
     if not is_server_running(server):
