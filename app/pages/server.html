@@ -8,9 +8,11 @@
     <button class="stop-server" onclick="socket.emit('stop_server', {'server_id': serverId})" hidden>Stop</button>
     <button class="restart-server" onclick="socket.emit('restart_server', {'server_id': serverId})" hidden>Restart</button>
     <button class="run-command" onclick="runCommand()" hidden>Run Command</button>
+    <button onclick="showTab('console')" id="console-tab" hidden>Console</button>
+    <button onclick="showTab('files')" id="files-tab">Files</button>
 </div>
 <div class="server-console">{{get_server_output(server)}}</div>
-<div class="server-files">
+<div class="server-files" hidden>
 
 </div>
 {% endblock %}
@@ -118,6 +120,19 @@
             .catch(error => {
                 alert('An error occurred: ' + error.message);
             });
+    }
+    function showTab(tab) {
+        if (tab === 'console') {
+            document.querySelector(".server-console").hidden = false;
+            document.querySelector(".server-files").hidden = true;
+            document.getElementById("console-tab").hidden = true;
+            document.getElementById("files-tab").hidden = false;
+        } else {
+            document.querySelector(".server-console").hidden = true;
+            document.querySelector(".server-files").hidden = false;
+            document.getElementById("console-tab").hidden = false;
+            document.getElementById("files-tab").hidden = true;
+        }
     }
     listDir("");
 </script>
