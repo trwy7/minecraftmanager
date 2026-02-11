@@ -87,6 +87,30 @@ main {
 #server .server-console {
     height: 450px;
 }
+.rename-button {
+    background-color: #008CBA;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.rename-button:hover {
+    background-color: #007bb5;
+}
+.delete-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.delete-button:hover {
+    background-color: #da190b;
+}
 .server-action-buttons {
     background-color: #808080;
     padding: 10px;
