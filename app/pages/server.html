@@ -10,6 +10,7 @@
     <button class="run-command" onclick="runCommand()" hidden>Run Command</button>
     <button onclick="showTab('console')" id="console-tab" hidden>Console</button>
     <button onclick="showTab('files')" id="files-tab">Files</button>
+    <button onclick="uploadFile()" id="upload-tab" hidden>Upload File</button>
 </div>
 <div class="server-console">{{get_server_output(server)}}</div>
 <div class="server-files" hidden>
@@ -20,6 +21,7 @@
 <script>
     var serverStatus = { running: {% if server_status.running %}true{% else %}false{% endif %}, fully_started: {% if server_status.fully_started %}true{% else %}false{% endif %} };
     const serverId = {{server.id}};
+    var currentDirectory = "";
     if (serverStatus.running) {
         document.querySelector(".start-server").hidden = true;
         if (serverStatus.fully_started) {
@@ -116,6 +118,7 @@
                     }
                     filesDiv.appendChild(fileElement);
                 });
+                currentDirectory = directory;
             })
             .catch(error => {
                 alert('An error occurred: ' + error.message);
@@ -127,12 +130,46 @@
             document.querySelector(".server-files").hidden = true;
             document.getElementById("console-tab").hidden = true;
             document.getElementById("files-tab").hidden = false;
+            document.getElementById("upload-tab").hidden = true;
         } else {
             document.querySelector(".server-console").hidden = true;
             document.querySelector(".server-files").hidden = false;
             document.getElementById("console-tab").hidden = false;
             document.getElementById("files-tab").hidden = true;
+            document.getElementById("upload-tab").hidden = false;
         }
+    }
+    function uploadFile() {
+        // Allow multiple file uploads at once, and then send individual PUT requests for each file
+        const input = document.createElement("input");
+        input.type = "file";
+        input.multiple = true;
+        input.onchange = () => {
+            const files = input.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const formData = new FormData();
+                formData.append("file", file);
+                const path = currentDirectory ? `${currentDirectory}/${file.name}` : file.name;
+                fetch(`/server/${serverId}/files/${path}`, {
+                    method: 'PUT',
+                    body: formData,
+                    credentials: 'include'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error uploading ' + file.name + ': ' + data.error);
+                    } else {
+                        listDir(currentDirectory);
+                    }
+                })
+                .catch(error => {
+                    alert('An error occurred while uploading ' + file.name + ': ' + error.message);
+                });
+            }
+        };
+        input.click();
     }
     listDir("");
 </script>
