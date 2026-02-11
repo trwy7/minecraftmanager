@@ -11,6 +11,7 @@
     <button onclick="showTab('console')" id="console-tab" hidden>Console</button>
     <button onclick="showTab('files')" id="files-tab">Files</button>
     <button onclick="uploadFile()" id="upload-tab" hidden>Upload File</button>
+    <button onclick="createDirectory()" id="create-folder" hidden>Create folder</button>
 </div>
 <div class="server-console">{{get_server_output(server)}}</div>
 <div class="server-files" hidden>
@@ -131,12 +132,14 @@
             document.getElementById("console-tab").hidden = true;
             document.getElementById("files-tab").hidden = false;
             document.getElementById("upload-tab").hidden = true;
+            document.getElementById("create-folder").hidden = true;
         } else {
             document.querySelector(".server-console").hidden = true;
             document.querySelector(".server-files").hidden = false;
             document.getElementById("console-tab").hidden = false;
             document.getElementById("files-tab").hidden = true;
             document.getElementById("upload-tab").hidden = false;
+            document.getElementById("create-folder").hidden = false;
         }
     }
     function uploadFile() {
@@ -171,6 +174,28 @@
         };
         input.click();
     }
+    function createDirectory() {
+        const dirName = prompt("Folder name:");
+        if (dirName) {
+            const path = currentDirectory ? `${currentDirectory}/${dirName}` : dirName;
+            fetch(`/server/${serverId}/files/${path}`, {
+                method: 'POST',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    listDir(currentDirectory);
+                }
+            })
+            .catch(error => {
+                alert('An error occurred: ' + error.message);
+            });
+        }
+    }
+     // Scroll console to bottom on page load
     document.addEventListener("DOMContentLoaded", () => {
         const consoleDiv = document.querySelector(".server-console");
         consoleDiv.scrollTop = consoleDiv.scrollHeight - consoleDiv.clientHeight;

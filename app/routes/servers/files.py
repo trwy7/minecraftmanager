@@ -22,11 +22,18 @@ def handle_server_files(server_id, filename):
     elif request.method == 'PUT':
         file = request.files.get('file')
         if not file:
-            return {'error': 'No file uploaded'}, 400
+            if request.json.get('new_name'):
+                new_path = os.path.join(server_dir, request.json['new_name'])
+                if os.path.exists(new_path):
+                    return {'error': 'File or directory with new name already exists'}, 400
+                os.rename(file_path, new_path)
+                return {'message': 'File or directory renamed successfully'}, 200
         file.save(file_path)
         return {'message': 'File uploaded successfully'}, 200
     elif request.method == 'POST':
-        os.mkdir(file_path, exist_ok=True)
+        if os.path.exists(file_path):
+            return {'error': 'File or directory already exists'}, 400
+        os.makedirs(file_path)
         return {'message': 'Directory created successfully'}, 200
     elif request.method == 'DELETE':
         if os.path.exists(file_path):
