@@ -91,5 +91,10 @@
             });
         }
     }
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".server-console").forEach(consoleDiv => {
+            consoleDiv.scrollTop = consoleDiv.scrollHeight - consoleDiv.clientHeight;
+        });
+    });
 </script>
 {% endblock %}

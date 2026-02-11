@@ -171,6 +171,10 @@
         };
         input.click();
     }
+    document.addEventListener("DOMContentLoaded", () => {
+        const consoleDiv = document.querySelector(".server-console");
+        consoleDiv.scrollTop = consoleDiv.scrollHeight - consoleDiv.clientHeight;
+    });
     listDir("");
 </script>
 {% endblock %}
