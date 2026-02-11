@@ -10,6 +10,9 @@
     <button class="run-command" onclick="runCommand()" hidden>Run Command</button>
 </div>
 <div class="server-console">{{get_server_output(server)}}</div>
+<div class="server-files">
+
+</div>
 {% endblock %}
 {% block script %}
 <script>
@@ -84,5 +87,38 @@
             document.querySelector(".run-command").hidden = false;
         }
     });
+    function listDir(directory) {
+        fetch(`/server/${serverId}/files/${directory}`, {credentials: 'include'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                const filesDiv = document.querySelector(".server-files");
+                filesDiv.innerHTML = "";
+                backelement = document.createElement("div");
+                backelement.textContent = "..";
+                backelement.classList.add("directory");
+                backelement.onclick = () => listDir(directory.split("/").slice(0, -1).join("/")); // uhh
+                filesDiv.appendChild(backelement);
+                data.files.forEach(file => {
+                    const fileElement = document.createElement("div");
+                    if (file.type === 'dir') {
+                        fileElement.textContent = "📁 " + file.name;
+                        fileElement.classList.add("directory");
+                        fileElement.onclick = () => listDir(directory ? `${directory}/${file.name}` : file.name);
+                    } else {
+                        fileElement.textContent = "📄 " + file.name;
+                        fileElement.classList.add("file");
+                    }
+                    filesDiv.appendChild(fileElement);
+                });
+            })
+            .catch(error => {
+                alert('An error occurred: ' + error.message);
+            });
+    }
+    listDir("");
 </script>
 {% endblock %}
