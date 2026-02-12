@@ -177,7 +177,6 @@ def run_server(server):
     cwd = f"/servers/{sid}"
     if not os.path.exists(cmd):
         print(f"Run command {cmd} does not exist for server {server.name}")
-        send_update("server_stopped", {"server_id": server.id})
         send_update("server_output", {"server_id": server.id, "output": f"Run command {cmd.removeprefix(cwd)} not found. Server cannot be started.\n"})
         return
     # Run without a shell to ensure stdout is captured correctly
