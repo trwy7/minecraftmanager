@@ -7,13 +7,15 @@
     <button class="start-server" onclick="socket.emit('start_server', {'server_id': serverId})">Start</button>
     <button class="stop-server" onclick="socket.emit('stop_server', {'server_id': serverId})" hidden>Stop</button>
     <button class="restart-server" onclick="socket.emit('restart_server', {'server_id': serverId})" hidden>Restart</button>
-    <button class="run-command" onclick="runCommand()" hidden>Run Command</button>
+    <button class="run-command" onclick="runCommand()" hidden>RCON</button>
     <button onclick="showTab('console')" id="console-tab" hidden>Console</button>
     <button onclick="showTab('files')" id="files-tab">Files</button>
     <button onclick="uploadFile()" id="upload-tab" hidden>Upload File</button>
     <button onclick="createDirectory()" id="create-folder" hidden>Create folder</button>
 </div>
-<div class="server-console">{{get_server_output(server)}}</div>
+<div class="server-console">
+    <div class="server-console-inner">{{get_server_output(server)}}</div><input type="text" class="server-command-input" placeholder="Command" onkeydown="sendCommand(event)">
+</div>
 <div class="server-files" hidden>
 
 </div>
@@ -28,7 +30,7 @@
         if (serverStatus.fully_started) {
             document.querySelector(".stop-server").hidden = false;
             document.querySelector(".restart-server").hidden = false;
-            document.querySelector(".run-command").hidden = false;
+            //document.querySelector(".run-command").hidden = false;
         }
     }
     socket.on("server_started", (data) => {
@@ -36,7 +38,7 @@
             console.log("Server started:", data);
             serverStatus = {running: true, fully_started: false};
             document.querySelector(".start-server").hidden = true;
-            const consoleDiv = document.querySelector(".server-console");
+            const consoleDiv = document.querySelector(".server-console-inner");
             consoleDiv.textContent = "";
         }
     });
@@ -53,9 +55,10 @@
     socket.on("server_output", (data) => {
         if (data.server_id == serverId) {
             console.log("Server output:", data);
+            const consoleInDiv = document.querySelector(".server-console-inner");
             const consoleDiv = document.querySelector(".server-console");
             const isAtBottom = consoleDiv.scrollHeight - consoleDiv.clientHeight <= consoleDiv.scrollTop + 1;
-            consoleDiv.textContent += data.output;
+            consoleInDiv.textContent += data.output;
             if (isAtBottom) {
                 consoleDiv.scrollTop = consoleDiv.scrollHeight - consoleDiv.clientHeight;
             }
@@ -89,7 +92,7 @@
             serverStatus.fully_started = true;
             document.querySelector(".stop-server").hidden = false;
             document.querySelector(".restart-server").hidden = false;
-            document.querySelector(".run-command").hidden = false;
+            //document.querySelector(".run-command").hidden = false;
         }
     });
     function listDir(directory) {
@@ -267,6 +270,33 @@
         const consoleDiv = document.querySelector(".server-console");
         consoleDiv.scrollTop = consoleDiv.scrollHeight - consoleDiv.clientHeight;
     });
+    let cmdhistory = [];
+    let cmdhistoryindex = 0;
+    function sendCommand(event) {
+        if (event.key === "Enter") {
+            const input = event.target;
+            const command = input.value.trim();
+            if (command) {
+                socket.emit("send_command", {server_id: serverId, command: command});
+                cmdhistory.push(command);
+                cmdhistoryindex = cmdhistory.length;
+                input.value = "";
+            }
+        } else if (event.key === "ArrowUp") {
+            if (cmdhistoryindex > 0) {
+                cmdhistoryindex--;
+                event.target.value = cmdhistory[cmdhistoryindex];
+            }
+        } else if (event.key === "ArrowDown") {
+            if (cmdhistoryindex < cmdhistory.length - 1) {
+                cmdhistoryindex++;
+                event.target.value = cmdhistory[cmdhistoryindex];
+            } else {
+                cmdhistoryindex = cmdhistory.length;
+                event.target.value = "";
+            }
+        }
+    }
     listDir("");
 </script>
 {% endblock %}

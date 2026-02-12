@@ -81,6 +81,14 @@ main {
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
 }
+.server-console .server-command-input {
+    width: calc(100% - 20px);
+    padding: 5px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+}
 .directory, .file {
     padding: 5px;
     border-bottom: 1px solid #555;
