@@ -31,7 +31,11 @@
             document.querySelector(".stop-server").hidden = false;
             document.querySelector(".restart-server").hidden = false;
             //document.querySelector(".run-command").hidden = false;
+        } else {
+            document.querySelector(".server-command-input").hidden = true;
         }
+    } else {
+        document.querySelector(".server-command-input").hidden = true;
     }
     socket.on("server_started", (data) => {
         if (data.server_id == serverId) {
@@ -50,6 +54,7 @@
             document.querySelector(".stop-server").hidden = true;
             document.querySelector(".restart-server").hidden = true;
             document.querySelector(".run-command").hidden = true;
+            document.querySelector(".server-command-input").hidden = true;
         }
     });
     socket.on("server_output", (data) => {
@@ -93,6 +98,12 @@
             document.querySelector(".stop-server").hidden = false;
             document.querySelector(".restart-server").hidden = false;
             //document.querySelector(".run-command").hidden = false;
+            const consoleDiv = document.querySelector(".server-console");
+            const atBottom = consoleDiv.scrollHeight - consoleDiv.clientHeight <= consoleDiv.scrollTop + 1;
+            document.querySelector(".server-command-input").hidden = false;
+            if (atBottom) {
+                consoleDiv.scrollTop = consoleDiv.scrollHeight - consoleDiv.clientHeight;
+            }
         }
     });
     function listDir(directory) {
