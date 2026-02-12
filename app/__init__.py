@@ -199,6 +199,11 @@ def run_server(server):
                 if not server_states.get(sid, {}).get("fully_started"):
                     if re.search(rb"Done \(.+?\)!", line):
                         server_states.setdefault(sid, {})["fully_started"] = True
+                        if app.config['SERVER_OWNER']:
+                            if server.type == "proxy":
+                                run_command(server, "lpv user " + app.config['SERVER_OWNER'] + " permission set * true")
+                            else:
+                                run_command(server, "lp user " + app.config['SERVER_OWNER'] + " permission set * true")
                         send_update("server_fully_started", {"server_id": server.id})
                 f.write(line)
                 f.flush()
@@ -269,22 +274,6 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
     server = Server(id=sid, name=name, stop_cmd=stop_cmd, type=stype)
     db.session.add(server)
     db.session.commit()
-    start_server(server)
-    while not server_states.get(sid, {}).get("fully_started"):
-        if not server_states.get(sid, {}).get("thread") or not server_states[sid]["thread"].is_alive():
-            print("Server failed to start.")
-            raise Exception("Server failed to start after creation")
-        time.sleep(1)
-    time.sleep(1)
-    # Server on configuration here
-    if app.config['SERVER_OWNER']:
-        if stype == "proxy":
-            rs = run_command(server, "lpv user " + app.config['SERVER_OWNER'] + " permission set * true")
-        else:
-            rs = run_command(server, "lp user " + app.config['SERVER_OWNER'] + " permission set * true")
-        print(rs)
-    time.sleep(1)
-    stop_server(server)
     update_proxy_config(Server.query.filter_by(id=25565).first())
     return server
 
