@@ -86,6 +86,8 @@ main {
 }
 #server .server-console {
     height: 450px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
 }
 .rename-button {
     background-color: #008CBA;
