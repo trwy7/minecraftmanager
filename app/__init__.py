@@ -175,6 +175,11 @@ def run_server(server):
     sid = server.id
     cmd = f"/servers/{sid}/run.sh"
     cwd = f"/servers/{sid}"
+    if not os.path.exists(cmd):
+        print(f"Run command {cmd} does not exist for server {server.name}")
+        send_update("server_stopped", {"server_id": server.id})
+        send_update("server_output", {"server_id": server.id, "output": f"Run command {cmd.removeprefix(cwd)} not found. Server cannot be started.\n"})
+        return
     # Run without a shell to ensure stdout is captured correctly
     with subprocess.Popen(
         [cmd],
@@ -183,6 +188,7 @@ def run_server(server):
         stderr=subprocess.STDOUT,
         shell=False
     ) as proc:
+        send_update("server_started", {"server_id": server.id})
         # store the proc in the shared server state
         server_states.setdefault(sid, {})["proc"] = proc
         log_path = f"{cwd}/output.log"
@@ -202,8 +208,7 @@ def run_server(server):
         # clear the proc when finished
         server_states.setdefault(sid, {})["proc"] = None
         server_states.setdefault(sid, {})["fully_started"] = False
-        if len(authenticated_clients) != 0:
-            send_update("server_stopped", {"server_id": server.id})
+        send_update("server_stopped", {"server_id": server.id})
 
 def start_server(server):
     """Start the server in a background thread if not already running."""
@@ -219,8 +224,6 @@ def start_server(server):
         print(f"Server {server.name} is a proxy, updating config.")
         update_proxy_config(server)
     thread.start()
-    if len(authenticated_clients) != 0:
-        send_update("server_started", {"server_id": server.id})
     return thread
 
 def stop_server(server):
