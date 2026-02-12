@@ -116,13 +116,16 @@ def get_server_status(server):
         "fully_started": server_states.get(server.id, {}).get("fully_started", False)
     }
 
-def get_server_output(server, tail=100):
+def get_server_output(server, tail=100, include_colors=False):
     log_path = f"/servers/{server.id}/output.log"
     if not os.path.exists(log_path):
         return ""
     with open(log_path, "r") as f:
         lines = f.readlines()
-        return "".join(lines[-tail:])
+        if include_colors:
+            return "".join(lines[-tail:])
+        else:
+            return "".join(re.sub(r'\x1b\[[0-9;]*m', '', line) for line in lines[-tail:])
 
 def run_command(server, command):
     print(f"Running command '{command}' on '{server.name}'...")
@@ -157,6 +160,22 @@ def update_proxy_config(server):
         if is_server_running(server):
             run_command(server, "velocity reload")
 
+def send_stdin(server, command):
+    """Send a command to the server's stdin if it's running."""
+    sid = server.id
+    proc = server_states.get(sid, {}).get("proc")
+    if proc and proc.poll() is None:
+        try:
+            proc.stdin.write((command + "\n").encode())
+            proc.stdin.flush()
+            return True
+        except Exception as e:
+            print(f"Failed to send command to server {server.name}: {e}")
+            return False
+    else:
+        print(f"Cannot send command, server {server.name} is not running.")
+        return False
+
 # AI disclosure
 # AI and a lot of manual debugging ahead
 
@@ -185,6 +204,7 @@ def run_server(server):
         cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        stdin=subprocess.PIPE,
         shell=False
     ) as proc:
         send_update("server_started", {"server_id": server.id})
@@ -195,15 +215,15 @@ def run_server(server):
             for line in iter(proc.stdout.readline, b""):
                 #print(f"[{server.name}] {line.decode()}", end="")
                 if len(authenticated_clients) != 0:
-                    send_update("server_output", {"server_id": server.id, "output": line.decode()})
+                    send_update("server_output", {"server_id": server.id, "output": re.sub(r'\x1b\[[0-9;]*m', '', line.decode())})
                 if not server_states.get(sid, {}).get("fully_started"):
                     if re.search(rb"Done \(.+?\)!", line):
                         server_states.setdefault(sid, {})["fully_started"] = True
                         if app.config['SERVER_OWNER']:
                             if server.type == "proxy":
-                                run_command(server, "lpv user " + app.config['SERVER_OWNER'] + " permission set * true")
+                                send_stdin(server, "lpv user " + app.config['SERVER_OWNER'] + " permission set luckperms.* true")
                             else:
-                                run_command(server, "lp user " + app.config['SERVER_OWNER'] + " permission set * true")
+                                send_stdin(server, "lp user " + app.config['SERVER_OWNER'] + " permission set luckperms.* true")
                         send_update("server_fully_started", {"server_id": server.id})
                 f.write(line)
                 f.flush()
