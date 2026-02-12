@@ -78,6 +78,8 @@ main {
     white-space: pre-wrap;
     border-radius: 4px;
     margin-bottom: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
 }
 .directory, .file {
     padding: 5px;
@@ -86,8 +88,6 @@ main {
 }
 #server .server-console {
     height: 450px;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
 }
 .rename-button {
     background-color: #008CBA;
