@@ -36,3 +36,5 @@ A list of each bundled plugin
   - RCON support for velocity
 - [Viaversion](https://modrinth.com/plugin/viaversion) + [Viabackwards](https://modrinth.com/plugin/viabackwards) + [Viarewind](https://modrinth.com/plugin/viarewind)
   - Allows players from different client versions to join your server
+- [FabricProxy-Lite](https://modrinth.com/mod/fabricproxy-lite)
+  - Velocity forwarding support for fabric
