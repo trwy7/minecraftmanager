@@ -12,6 +12,7 @@
     <button onclick="showTab('files')" id="files-tab">Files</button>
     <button onclick="uploadFile()" id="upload-tab" hidden>Upload File</button>
     <button onclick="createDirectory()" id="create-folder" hidden>Create folder</button>
+    <button class="delete-server" onclick="deleteServer()">Delete server</button>
 </div>
 <div class="server-console">
     <div class="server-console-inner">{{get_server_output(server)}}</div><input type="text" class="server-command-input" placeholder="Command" onkeydown="sendCommand(event)">
@@ -306,6 +307,27 @@
                 cmdhistoryindex = cmdhistory.length;
                 event.target.value = "";
             }
+        }
+    }
+    function deleteServer() {
+        if (confirm("Are you sure you want to delete this server?")) {
+            fetch(`/server/${serverId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = "/";
+                } else {
+                    response.text().then(text => {
+                        alert('Failed to delete server: ' + response.statusText + ' - ' + text);
+                    });
+                    throw new Error('Failed to delete server: ' + response.statusText);
+                }
+            })
+            .catch(error => {
+                alert('An error occurred: ' + error.message);
+            });
         }
     }
     listDir("");

@@ -56,7 +56,7 @@ RUN java21 -version
 # Script requirements
 
 RUN apt-get update && \
-    apt-get install -y curl jq openssl sudo && \
+    apt-get install -y curl jq openssl sudo lsof && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

@@ -312,7 +312,11 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
     return server
 
 def delete_server(server):
-    stop_server(server)
+    if server.id in [25565, 30000]:
+        raise ValueError("Cannot delete proxy or lobby server")
+    os.system(f"kill -9 $(lsof -t -i :{server.id})")
+    #stop_server(server)
+    del server_states[server.id]
     if os.path.exists(f"/servers/{server.id}"):
         shutil.rmtree(f"/servers/{server.id}")
     db.session.delete(server)

@@ -1,4 +1,4 @@
-from app import app, Server, socketio, start_server, stop_server, run_command, require_login, send_stdin
+from app import app, Server, socketio, start_server, stop_server, run_command, require_login, send_stdin, delete_server
 from flask import request
 
 @socketio.on('start_server')
@@ -46,3 +46,15 @@ def run_server_command(server_id):
 
     output = run_command(server, command)
     return {'output': output}, 200
+
+@app.route('/server/<int:server_id>', methods=['DELETE'])
+@require_login
+def delete_server_route(server_id):
+    server = Server.query.get(server_id)
+    if not server:
+        return {'error': 'Server not found'}, 404
+    try:
+        delete_server(server)
+    except ValueError as e:
+        return str(e), 400
+    return {'message': 'Server deleted successfully'}, 200
