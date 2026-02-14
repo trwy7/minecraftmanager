@@ -143,6 +143,14 @@ def run_command(server, command):
     return response
 
 def update_proxy_config(server):
+    if not os.path.exists(f"/servers/{server.id}/velocity.toml"):
+        start_server(server, init=False)
+        # wait for server to start
+        while not server_states.get(server.id, {}).get("fully_started"):
+            if not server_states.get(server.id, {}).get("thread") or not server_states[server.id]["thread"].is_alive():
+                print(f"Server {server.name} failed to start, cannot update proxy config.")
+                return
+            time.sleep(1)
     if os.path.exists(f"/servers/{server.id}/velocity.toml"):
         with open(f"/servers/{server.id}/velocity.toml", "r") as f:
             config = toml.load(f)
@@ -159,6 +167,12 @@ def update_proxy_config(server):
             toml.dump(config, f)
         if is_server_running(server):
             run_command(server, "velocity reload")
+        print("Proxy config updated.")
+    else:
+        print(f"No velocity.toml found for server {server.name}, skipping proxy config update.")
+
+def update_proxy_mappings():
+    pass
 
 def send_stdin(server, command):
     """Send a command to the server's stdin if it's running."""
@@ -234,7 +248,7 @@ def run_server(server):
         server_states.setdefault(sid, {})["fully_started"] = False
         send_update("server_stopped", {"server_id": server.id})
 
-def start_server(server):
+def start_server(server, init=True):
     """Start the server in a background thread if not already running."""
     print(f"Starting server {server.name}...")
     sid = server.id
@@ -244,7 +258,7 @@ def start_server(server):
     thread = threading.Thread(target=run_server, daemon=True, args=(server,))
     server_states.setdefault(sid, {})["thread"] = thread
     server_states.setdefault(sid, {})["fully_started"] = False
-    if server.type == "proxy":
+    if server.type == "proxy" and init:
         print(f"Server {server.name} is a proxy, updating config.")
         update_proxy_config(server)
     thread.start()
@@ -259,7 +273,7 @@ def stop_server(server):
         print(f"Server {server.name} is not running.")
         return None
     print(f"Sending stop command to server {server.name}...")
-    run_command(server, server.stop_cmd)
+    send_stdin(server, server.stop_cmd)
     if proc:
         proc.wait(timeout=60)
     socketio.sleep(1)
@@ -291,7 +305,7 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
     if cresp != 0:
         raise Exception("Failed to create server")
     print("Server created. Running initial setup...")
-    server = Server(id=sid, name=name, stop_cmd=stop_cmd, type=stype)
+    server = Server(id=sid, name=name, stop_cmd=stop_cmd, type=stype, cscript=software_type)
     db.session.add(server)
     db.session.commit()
     update_proxy_config(Server.query.filter_by(id=25565).first())
@@ -325,6 +339,7 @@ class Server(db.Model):
     name = db.Column(db.String(30), unique=True, nullable=False)
     stop_cmd = db.Column(db.String(30), nullable=False)
     type = db.Column(db.String(5), nullable=False)
+    cscript = db.Column(db.String(10), nullable=True)
     thread = None
     proc = None
 

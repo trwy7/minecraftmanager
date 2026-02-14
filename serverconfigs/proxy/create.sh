@@ -88,9 +88,9 @@ cat << 'EOF' > plugins/Geyser-Velocity/config.yml
 java:
   auth-type: floodgate
 EOF
-cat << 'EOF' > plugins/floodgate/config.yml
-send-floodgate-data: true
-EOF
+#cat << 'EOF' > plugins/floodgate/config.yml
+#send-floodgate-data: true
+#EOF
 
 # Create forwarding secret
 echo "Creating forwarding secret..."
