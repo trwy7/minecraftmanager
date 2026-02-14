@@ -30,6 +30,7 @@ mkdir -p mods
 /app/serverconfigs/modrinthdownload.sh "luckperms" "fabric" "$2" "mods/luckperms.jar"
 /app/serverconfigs/modrinthdownload.sh "simple-voice-chat" "fabric" "$2" "mods/simple-voice-chat.jar"
 /app/serverconfigs/modrinthdownload.sh "fabricproxy-lite" "fabric" "$2" "mods/fabricproxy-lite.jar"
+/app/serverconfigs/modrinthdownload.sh "fabric-api" "fabric" "$2" "mods/fabricapi.jar"
 
 # Create voicechat config
 VOICE_PORT=$(($1 + 100))
