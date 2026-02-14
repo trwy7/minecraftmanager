@@ -1,22 +1,33 @@
 # Simple Minecraft Manager
 
-Simple Minecraft Manager is a server manager for Minecraft. This is designed from the ground up to be as simple to set up as possible. This is designed for use with a friend group that requires more than one server, but still wants an easy to use solution.
+Simple Minecraft Manager is a server manager for Minecraft. This is designed from the ground up to be as simple to set up as possible. This is designed for use with a small group that requires more than one server, but still wants an easy to use solution.
 
 ## Requirements
 
-The java minecraft server has high memory requirements. By default, 6 GB of ram is required for the proxy and papermc lobby, but increases with plugins/mods/quantity of servers.
+The java minecraft server has high memory requirements. By default, 4 GB of ram is required for the proxy and papermc lobby, but increases with plugins/mods/quantity of servers.
+You must also agree to the [Minecraft EULA](https://aka.ms/MinecraftEULA)
 
 ## How to use
 
-When starting your server for the first time, check the console for `Created initial 'admin' user with password`, and log in at localhost:7843 (or whatever your port is set to).
+```sh
+git clone https://github.com/trwy7/minecraftmanager.git
+cd minecraftmanager
+cp .env.example .env
+```
+
+Open .env, and replace `069a79f4-44e9-4726-a5be-fca90e38aaf5` with your minecraft UUID (or remove the line). Then run `docker compose up --build`
+
+When starting your server for the first time, check the console for `Created initial 'admin' user with password`, and log in at localhost:7843
 By default, a proxy and a lobby (papermc) server is created. These servers cannot be deleted, but new servers may be added very easily:
 
 - Click add server
 - Select a name, server software, and game version
 - Wait 1 minute
-- Add plugins
+- Click your server's name
+- Go to files
+- Add some plugins/mods
 - Start your server
-- Players may join with `/server <name>`, no restart needed
+- Players may join with `/server <name>` while in game, or by joining `<name>.<yourdomain>`
 
 This project is designed to be forked, and for the user to add their own configurations.
 
