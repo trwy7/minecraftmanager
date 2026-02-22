@@ -9,8 +9,6 @@ You must also agree to the [Minecraft EULA](https://aka.ms/MinecraftEULA)
 
 ## How to use
 
-Open .env, and replace `069a79f4-44e9-4726-a5be-fca90e38aaf5` with your minecraft UUID (or remove the line). Then run `docker compose up --build`
-
 When starting your server for the first time, check the console for `Created initial 'admin' user with password`, and log in at localhost:7843
 By default, a proxy and a lobby (papermc) server is created. These servers cannot be deleted, but new servers may be added very easily:
 
