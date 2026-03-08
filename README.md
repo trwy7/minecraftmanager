@@ -9,6 +9,47 @@ You must also agree to the [Minecraft EULA](https://aka.ms/MinecraftEULA)
 
 ## How to use
 
+To run, you must install docker, you can learn how at https://docs.docker.com/engine/install/
+## Quick setup
+Run 
+```sh
+docker run -p 7843:7843 -p 25565:25565 -p 25565:25565/udp -p 19132:19132/udp -v mcm_servers:/servers -v mcm_data:/data -h minecraftmanager --stop-signal SIGINT --stop-timeout 60 ghcr.io/trwy7/minecraftmanager:1.0.0
+```
+then wait 1-2 minutes (depending on your internet connection and computer speed) and go to localhost:7843 in your browser. In your console, you should see `Created initial 'admin' user with password`, and log in with the password it gives you
+## Full setup
+This setup requires docker-compose, you can install it here: https://docs.docker.com/compose/install/linux/
+Create this file in any directory as `docker-compose.yml`:
+```yml
+services:
+  minecraftmanager:
+    ports:
+      - 7843:7843 # HTTP
+      - 25565:25565 # Minecraft
+      - 25565:25565/udp # Minecraft
+      - 19132:19132/udp # Bedrock/Geyser
+    volumes:
+      - servers:/servers
+      - data:/data
+    environment:
+      - SECRET_KEY=ChangeMeP13aseThisIsNotAGoodSecretKey
+      - BASE_DOMAIN=mc.example.com # Optional
+      - SERVER_OWNER=069a79f4-44e9-4726-a5be-fca90e38aaf5 # Optional
+    hostname: minecraftmanager
+    stop_signal: SIGINT
+    stop_grace_period: 60s
+    image: ghcr.io/trwy7/minecraftmanager:1.0.0
+volumes:
+  servers:
+  data:
+```
+Replace `ChangeMeP13aseThisIsNotAGoodSecretKey` with any alphanumeric string larger than 32 characters
+Replace `mc.example.com` with the domain that players can join from, this assumes *.<domain> is also pointed at this server, you may remove this if you do not have a domain
+Replace `069a79f4-44e9-4726-a5be-fca90e38aaf5` with your own Minecraft UUID, or remove it
+Finally, run `docker-compose up -d`
+When starting your server for the first time, run `docker compose logs | grep password` to find the admin account password
+
+## First run
+
 When starting your server for the first time, check the console for `Created initial 'admin' user with password`, and log in at localhost:7843
 By default, a proxy and a lobby (papermc) server is created. These servers cannot be deleted, but new servers may be added very easily:
 
