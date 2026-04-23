@@ -43,7 +43,7 @@ volumes:
   data:
 ```
 Replace `ChangeMeP13aseThisIsNotAGoodSecretKey` with any alphanumeric string larger than 32 characters
-Replace `mc.example.com` with the domain that players can join from, this assumes *.<domain> is also pointed at this server, you may remove this if you do not have a domain
+Replace `mc.example.com` with the domain that players can join from, this assumes you have a wildcard of your domain (`*.domain.tld`) that is also pointed at this server, you may remove this line if you do not have a domain you would like to use.
 Replace `069a79f4-44e9-4726-a5be-fca90e38aaf5` with your own Minecraft UUID, or remove it
 Finally, run `docker-compose up -d`
 When starting your server for the first time, run `docker compose logs | grep password` to find the admin account password
