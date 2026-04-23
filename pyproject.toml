@@ -1,0 +1,19 @@
+[project]
+name = "minecraftmanager"
+version = "1.0.0"
+description = "A simple server manager for minecraft"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1.3",
+    "flask-bcrypt>=1.0.1",
+    "flask-limiter>=4.1.1",
+    "flask-socketio>=5.6.1",
+    "flask-sqlalchemy>=3.1.1",
+    "gevent>=26.4.0",
+    "mcstatus>=13.1.0",
+    "pyjwt>=2.12.1",
+    "rcon>=2.4.9",
+    "requests>=2.33.1",
+    "toml>=0.10.2",
+]

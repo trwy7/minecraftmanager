@@ -11,6 +11,10 @@ FROM eclipse-temurin:17-jre AS java17
 FROM eclipse-temurin:21-jre AS java21
 
 FROM python:3.13.1-slim as base
+COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /uvx /bin/
+
+# Disable development dependencies
+ENV UV_NO_DEV=1
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -60,17 +64,18 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
-# Leverage a bind mount to requirements.txt to avoid having to copy them into
-# into this layer.
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    --mount=type=bind,source=requirements.txt,target=requirements.txt \
-    python -m pip install -r requirements.txt
+# Install dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project
 
 # Copy the source code into the container.
 COPY --chown=appuser:appuser . /app
+
+# Install dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked
 
 # Switch back to the non-privileged user.
 #USER appuser # Now done in entrypoint
@@ -81,4 +86,4 @@ EXPOSE 7843
 # Run the application using exec form (JSON array) so signals are delivered properly.
 ENTRYPOINT ["/app/entrypoint.sh"]
 #CMD ["waitress-serve", "--host=0.0.0.0", "--port=7843", "app:app"]
-CMD ["python3", "-u", "-m", "app"]
+CMD ["/app/.venv/bin/python3", "-u", "-m", "app"]
