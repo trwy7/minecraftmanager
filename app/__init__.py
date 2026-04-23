@@ -304,7 +304,7 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
     cresp = os.system(f"cd /servers/{sid} && /app/serverconfigs/{software_type}/create.sh {sid} {version}")
     if cresp != 0:
         raise Exception("Failed to create server")
-    print("Server created. Running initial setup...")
+    print("Server created. Setting up proxy...")
     server = Server(id=sid, name=name, stop_cmd=stop_cmd, type=stype, cscript=software_type)
     db.session.add(server)
     db.session.commit()
