@@ -1,4 +1,5 @@
 # pylint: disable=missing-function-docstring, missing-class-docstring, wrong-import-position, wrong-import-order
+import logging
 from gevent import monkey, signal_handler
 monkey.patch_all()
 import os
@@ -26,8 +27,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/db.sqlite3'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "ChangeM3P13ase")
 app.config['SERVER_OWNER'] = os.environ.get('SERVER_OWNER')
 if os.environ.get('ENV_MODE') == "dev":
-    print("Running in dev mode, enabling auto reload")
+    app.logger.setLevel(logging.DEBUG)
+    print("Running in dev mode, enabling auto reload, you should disable this in production to improve performance.")
     app.config['TEMPLATES_AUTO_RELOAD'] = True
+else:
+    app.logger.setLevel(logging.INFO)
 
 db = SQLAlchemy(app)
 limiter = Limiter(app=app, key_func=lambda: request.remote_addr, default_limits=["100/minute", "5/second"], storage_uri="memory://")
