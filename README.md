@@ -1,6 +1,15 @@
 # Simple Minecraft Manager
 
-Simple Minecraft Manager is a server manager for Minecraft. This is designed from the ground up to be as simple to set up as possible. This is designed for use with a small group that requires more than one server, but still wants an easy to use solution.
+Simple Minecraft Manager is a server manager for Minecraft. This is designed from the ground up to be as simple to set up as possible. This is built for people who have little experience running a server. You may want to use [Crafty Controller](https://craftycontrol.com/) (Simple) or [Pterodactyl](https://pterodactyl.io/) (More features) if you have more experience.
+
+## Features
+
+- Automatic server setup
+- Automatic velocity proxy configuration
+- Easy to use
+- Simple setup
+- Multiple server support
+- Easy server management
 
 ## Requirements
 
