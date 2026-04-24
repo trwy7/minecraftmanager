@@ -28,7 +28,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "ChangeM3P13ase")
 app.config['SERVER_OWNER'] = os.environ.get('SERVER_OWNER')
 if os.environ.get('ENV_MODE') == "dev":
     app.logger.setLevel(logging.DEBUG)
-    print("Running in dev mode, enabling auto reload, you should disable this in production to improve performance.")
+    app.logger.warning("Running in dev mode, you should disable this in production to improve performance.")
     app.config['TEMPLATES_AUTO_RELOAD'] = True
 else:
     app.logger.setLevel(logging.INFO)
@@ -38,7 +38,7 @@ limiter = Limiter(app=app, key_func=lambda: request.remote_addr, default_limits=
 socketio = SocketIO(app, cors_allowed_origins="*")
 bcrypt = Bcrypt(app)
 
-print("This app requires that you agree to the Minecraft EULA. If you do not, please remove the app and related files.")
+print("\u001b[31mThis app requires that you agree to the Minecraft EULA. If you do not, please stop this container and remove it from your system.\u001b[0m")
 print("You may view it here: https://aka.ms/MinecraftEULA")
 
 @app.before_request
@@ -132,7 +132,7 @@ def get_server_output(server, tail=100, include_colors=False):
             return "".join(re.sub(r'\x1b\[[0-9;]*m', '', line) for line in lines[-tail:])
 
 def run_command(server, command):
-    print(f"Running command '{command}' on '{server.name}'...")
+    app.logger.debug(f"Running command '{command}' on '{server.name}'...")
     if not is_server_running(server):
         return None
     with Client('127.0.0.1', server.id + 1000, passwd='mcmanager') as client:
@@ -142,7 +142,7 @@ def run_command(server, command):
             # why does this not just return none by default
             response = None
         except ConnectionRefusedError:
-            print(f"Failed to connect to server {server.name} for command '{command}'. RCON is likely not initialized yet.")
+            app.logger.error(f"Failed to connect to server {server.name} for command '{command}'. RCON is likely not initialized yet.")
             return None
     return response
 
@@ -152,7 +152,7 @@ def update_proxy_config(server):
         # wait for server to start
         while not server_states.get(server.id, {}).get("fully_started"):
             if not server_states.get(server.id, {}).get("thread") or not server_states[server.id]["thread"].is_alive():
-                print(f"Server {server.name} failed to start, cannot update proxy config.")
+                app.logger.error(f"Server {server.name} failed to start, cannot update proxy config.")
                 return
             time.sleep(1)
     if os.path.exists(f"/servers/{server.id}/velocity.toml"):
@@ -164,16 +164,16 @@ def update_proxy_config(server):
         for qserver in Server.query.filter(Server.type != "proxy").all():
             config["servers"][qserver.name] = "127.0.0.1:" + str(qserver.id)
             if os.environ.get("BASE_DOMAIN"):
-                print(f"Adding forced-hosts config for {qserver.name} with domain {qserver.name + '.' + os.environ['BASE_DOMAIN']}")
+                app.logger.debug(f"Adding forced-hosts config for {qserver.name} with domain {qserver.name + '.' + os.environ['BASE_DOMAIN']}")
                 config["forced-hosts"][qserver.name + "." + os.environ["BASE_DOMAIN"]] = qserver.name
         config["servers"]['try'] = ["lobby"]
         with open(f"/servers/{server.id}/velocity.toml", "w") as f:
             toml.dump(config, f)
         if is_server_running(server):
             run_command(server, "velocity reload")
-        print("Proxy config updated.")
+        app.logger.info("Velocity proxy config updated.")
     else:
-        print(f"No velocity.toml found for server {server.name}, skipping proxy config update.")
+        app.logger.error(f"No velocity.toml found for server {server.name}, skipping proxy config update.")
 
 def update_proxy_mappings():
     pass
@@ -188,10 +188,10 @@ def send_stdin(server, command):
             proc.stdin.flush()
             return True
         except Exception as e:
-            print(f"Failed to send command to server {server.name}: {e}")
+            app.logger.error(f"Failed to send command (stdin) to server {server.name}: {e}")
             return False
     else:
-        print(f"Cannot send command, server {server.name} is not running.")
+        app.logger.warning(f"Cannot send command to stdin, server {server.name} is not running.")
         return False
 
 # AI disclosure
@@ -213,8 +213,8 @@ def run_server(server):
     cmd = f"/servers/{sid}/run.sh"
     cwd = f"/servers/{sid}"
     if not os.path.exists(cmd):
-        print(f"Run command {cmd} does not exist for server {server.name}")
-        send_update("server_output", {"server_id": server.id, "output": f"Run command {cmd.removeprefix(cwd)} not found. Server cannot be started.\n"})
+        app.logger.error(f"Run command {cmd} does not exist for server {server.name}")
+        send_update("server_output", {"server_id": server.id, "output": f"Run command {cmd} not found. Server cannot be started.\n"})
         return
     # Run without a shell to ensure stdout is captured correctly
     with subprocess.Popen(
@@ -254,7 +254,7 @@ def run_server(server):
 
 def start_server(server, init=True):
     """Start the server in a background thread if not already running."""
-    print(f"Starting server {server.name}...")
+    app.logger.info(f"Starting server {server.name}...")
     sid = server.id
     thread = server_states.get(sid, {}).get("thread")
     if thread and thread.is_alive():
@@ -263,7 +263,7 @@ def start_server(server, init=True):
     server_states.setdefault(sid, {})["thread"] = thread
     server_states.setdefault(sid, {})["fully_started"] = False
     if server.type == "proxy" and init:
-        print(f"Server {server.name} is a proxy, updating config.")
+        app.logger.debug(f"Server {server.name} is a proxy, updating config.")
         update_proxy_config(server)
     thread.start()
     return thread
@@ -272,11 +272,11 @@ def stop_server(server):
     """Stop the server gracefully, killing it if necessary."""
     sid = server.id
     proc = server_states.get(sid, {}).get("proc")
-    print(f"Stopping server {server.name} with status {proc}...")
+    app.logger.info(f"Stopping server {server.name} with status {proc}...")
     if not is_server_running(server):
-        print(f"Server {server.name} is not running.")
+        app.logger.warning(f"Cant stop server: {server.name} is not running.")
         return None
-    print(f"Sending stop command to server {server.name}...")
+    app.logger.debug(f"Sending stop command to server {server.name}...")
     send_stdin(server, server.stop_cmd)
     if proc:
         proc.wait(timeout=60)
@@ -284,7 +284,7 @@ def stop_server(server):
     thread = server_states.get(sid, {}).get("thread")
     if thread and thread.is_alive():
         if proc:
-            print(f"Server {server.name} did not stop gracefully, killing process...")
+            app.logger.warning(f"Server {server.name} did not stop gracefully, killing process...")
             proc.kill()
     server_states.setdefault(sid, {})["proc"] = None
     server_states.setdefault(sid, {})["thread"] = None
@@ -304,11 +304,11 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
             raise Exception("Server already exists")
         shutil.rmtree(f"/servers/{sid}")
     os.mkdir(f"/servers/{sid}")
-    print("Downloading server...")
+    app.logger.info("Running setup script for server type %s...", software_type)
     cresp = os.system(f"cd /servers/{sid} && /app/serverconfigs/{software_type}/create.sh {sid} {version}")
     if cresp != 0:
         raise Exception("Failed to create server")
-    print("Server created. Setting up proxy...")
+    app.logger.info("Server created. Setting up proxy...")
     server = Server(id=sid, name=name, stop_cmd=stop_cmd, type=stype, cscript=software_type)
     db.session.add(server)
     db.session.commit()
@@ -318,7 +318,8 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
 def delete_server(server):
     if server.id in [25565, 30000]:
         raise ValueError("Cannot delete proxy or lobby server")
-    os.system(f"kill -9 $(lsof -t -i :{server.id})")
+    app.logger.info("Deleting server %s...", server.name)
+    os.system(f"kill -9 $(lsof -t -i :{server.id})") # Kill anything listening on the server port (not like it needs to save anyway)
     #stop_server(server)
     del server_states[server.id]
     if os.path.exists(f"/servers/{server.id}"):
@@ -326,6 +327,7 @@ def delete_server(server):
     db.session.delete(server)
     db.session.commit()
     update_proxy_config(Server.query.filter_by(id=25565).first())
+    app.logger.info("Deleted server %s...", server.name)
 
 authenticated_clients = []
 def send_update(event, data):
@@ -352,12 +354,12 @@ class Server(db.Model):
     proc = None
 
 with app.app_context():
-    print("Initializing database...")
+    app.logger.info("Initializing database...")
     db.create_all()
     # Check if any servers exist, if not, create a proxy
-    print("Checking for existing servers...")
+    app.logger.debug("Checking for existing servers...")
     if Server.query.count() == 0:
-        print("No servers found, creating default proxy and lobby servers...")
+        app.logger.info("No servers found, creating proxy and lobby servers...")
         proxy = create_server(
             25565,
             "proxy",
@@ -380,37 +382,37 @@ with app.app_context():
 
 def start_all_servers():
     with app.app_context():
-        print("Starting all servers...")
+        app.logger.info("Starting all servers...")
         for server in Server.query.all():
-            print(f"Starting server {server.name}...")
+            app.logger.info(f"Starting server {server.name}...")
             start_server(server)
             while not server_states.get(server.id, {}).get("fully_started"):
                 if not server_states.get(server.id, {}).get("thread") or not server_states[server.id]["thread"].is_alive():
-                    print(f"Server {server.name} failed to start.")
+                    app.logger.warning(f"Server {server.name} failed to start.")
                     break
                 time.sleep(1)
-            print(f"Server {server.name} started.")
+            app.logger.info(f"Server {server.name} started.")
 
 threading.Thread(target=start_all_servers, daemon=True).start()
 
 def stop_all_servers():
     with app.app_context():
-        print("Stopping all servers...")
+        app.logger.info("Stopping all servers...")
         tlist = []
         for server in Server.query.all():
             # Start stopping all servers
-            print(f"Stopping server {server.name}...")
+            app.logger.info(f"Stopping server {server.name}...")
             t = threading.Thread(target=stop_server, args=(server,), daemon=True)
             t.start()
             tlist.append(t)
         for t in tlist:
             t.join()
-        print("All servers stopped.")
+        app.logger.info("All servers stopped.")
 
 def stop_signal_handler():
-    print("Received shutdown signal, stopping all servers...")
+    app.logger.info("Received shutdown signal, stopping all servers...")
     stop_all_servers() # Docker should kill this process after 60 seconds if there is a non responding server
-    print("All servers stopped. Exiting.")
+    app.logger.info("All servers stopped. Exiting.")
     sys.exit(0)
 
 signal_handler(signal.SIGINT, stop_signal_handler)
@@ -419,15 +421,15 @@ signal_handler(signal.SIGINT, stop_signal_handler)
 def handle_connect(auth):
     token = auth.get("token") if auth else None
     if not token:
-        print("No auth token provided, rejecting SocketIO connection")
+        app.logger.debug("No auth token provided, rejecting socket connection")
         return False
     try:
         cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")['usr']
         usr = get_user(cusr)
         if not usr:
-            print("Invalid user in token, rejecting SocketIO connection")
+            app.logger.debug("Invalid user in token, rejecting socket connection")
             return False
-        print(f"User {usr.id} connected via SocketIO")
+        app.logger.info(f"User {usr.id} connected via SocketIO")
         authenticated_clients.append(request.sid)
         socketio.emit("auth_success", {"message": "Authenticated successfully"}, to=request.sid)
     except jwt.exceptions.InvalidSignatureError:
@@ -435,7 +437,7 @@ def handle_connect(auth):
 
 @socketio.on("disconnect")
 def handle_disconnect():
-    print(f"Client {request.sid} disconnected from SocketIO")
+    app.logger.debug(f"Client {request.sid} disconnected from SocketIO")
     if request.sid in authenticated_clients:
         authenticated_clients.remove(request.sid)
 
@@ -444,5 +446,5 @@ for root, _, files in os.walk("app/routes"):
     for file in files:
         if file.endswith(".py") and not file.startswith("__"):
             module_path = os.path.join(root, file).replace("/", ".").rstrip(".py")
-            print(f"Importing module {module_path}...")
+            app.logger.debug(f"Importing module {module_path}...")
             importlib.import_module(module_path)
