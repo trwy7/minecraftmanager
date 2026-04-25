@@ -1,0 +1,31 @@
+{% extends "templates/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block mainid %}dashboard{% endblock %}
+{% block content %}
+<h1>Users</h1><button onclick="addUser()">Add user</button><br>
+<div id="users">
+    {% for user in users %}
+    <div class="user">
+        {{user.id}}<a href="/users/{{user.id}}">Edit</a><a href="/users/{{user.id}}/delete">Edit</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    function addUser() {
+        const name = prompt();
+        if (name === null) {
+            return
+        }
+        fetch('/adduser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name: name}),
+            credentials: 'include'
+        }) /* TODO: redirect to user page when done*/
+    }
+</script>
+{% endblock %}
