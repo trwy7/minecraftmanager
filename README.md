@@ -18,20 +18,21 @@ You must also agree to the [Minecraft EULA](https://aka.ms/MinecraftEULA)
 
 ## How to use
 
-To run, you must install docker, you can learn how at https://docs.docker.com/engine/install/
+To run, you must install docker, you can learn how [here](https://docs.docker.com/engine/install/)
 
 ## Quick setup
 
-Run 
+Use this command:
 
 ```sh
 docker run -p 7843:7843 -p 25565:25565 -p 25565:25565/udp -p 19132:19132/udp -v mcm_servers:/servers -v mcm_data:/data -h minecraftmanager --stop-signal SIGINT --stop-timeout 60 ghcr.io/trwy7/minecraftmanager:1.0.0
 ```
 
 then wait 1-2 minutes (depending on your internet connection and computer speed) and go to localhost:7843 in your browser. In your console, you should see `Created initial 'admin' user with password`, and log in with the password it gives you
+
 ## Full setup
 
-This setup requires docker-compose, you can install it here: https://docs.docker.com/compose/install/linux/
+This setup requires docker-compose, you can find how to install it [here](https://docs.docker.com/compose/install/linux/)
 Create this file in any directory as `docker-compose.yml`:
 
 ```yml
@@ -59,15 +60,16 @@ volumes:
 ```
 
 Replace `ChangeMeP13aseThisIsNotAGoodSecretKey` with any alphanumeric string larger than 32 characters
-Replace `mc.example.com` with the domain that players can join from, this assumes you have a wildcard of your domain (`*.domain.tld`) that is also pointed at this server, you may remove this line if you do not have a domain you would like to use.
+Replace `mc.example.com` with the domain that players can join from, this assumes you have a wildcard of your domain (`*.domain.tld`) that is also pointed at this server, you may remove this line if you do not have a domain, can't setup a wildcard, or want to force players to go through the lobby server to join.
 Replace `069a79f4-44e9-4726-a5be-fca90e38aaf5` with your own Minecraft UUID, or remove it
-Finally, run `docker-compose up -d`
-When starting your server for the first time, run `docker compose logs | grep password` to find the admin account password
+
+After setting everything how you want, run `docker-compose up -d`
+When starting MCM for the first time, run `docker compose logs | grep password` to find the admin account password
 
 ## First run
 
-When starting your server for the first time, check the console for `Created initial 'admin' user with password`, and log in at localhost:7843
-By default, a proxy and a lobby (papermc) server is created. These servers cannot be deleted, but new servers may be added very easily:
+The web UI is available at port 7843, try [this link](http://127.0.0.1:7843)
+By default, a proxy ([velocity](https://papermc.io/software/velocity/)) and a lobby ([paper](https://papermc.io/software/paper/)) server is created. These servers cannot be deleted, but new servers may be added very easily:
 
 - Click add server
 - Select a name, server software, and game version
@@ -82,7 +84,7 @@ This project is designed to be forked, and for the user to add their own configu
 
 ## Included plugins
 
-A list of each bundled plugin
+A few plugins are automatically installed, here are the most notable. You can delete them, but things may break.
 
 - [Geyser + Floodgate](https://geysermc.org/)
   - Allows bedrock players to join your server(s)
