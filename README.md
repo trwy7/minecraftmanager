@@ -18,7 +18,7 @@ You must also agree to the [Minecraft EULA](https://aka.ms/MinecraftEULA)
 
 ## How to use
 
-To run, you must install docker, you can learn how [here](https://docs.docker.com/engine/install/)
+To run, you must install docker, you can [learn how to install the Docker Engine](https://docs.docker.com/engine/install/)
 
 ## Quick setup
 
@@ -32,7 +32,7 @@ then wait 1-2 minutes (depending on your internet connection and computer speed)
 
 ## Full setup
 
-This setup requires docker-compose, you can find how to install it [here](https://docs.docker.com/compose/install/linux/)
+This setup requires docker-compose, [learn how to install the Docker Compose plugin](https://docs.docker.com/compose/install/linux/)
 Create this file in any directory as `docker-compose.yml`:
 
 ```yml
@@ -92,11 +92,11 @@ A few plugins are automatically installed, here are the most notable. You can de
   - Automatically gives you the `*` permission on each server you create
 - [Simple voice chat](https://modrinth.com/plugin/simple-voice-chat)
   - Proximity chat for minecraft
-- [Velocitab](https://modrinth.com/plugin/velocitab)
+- [Velocitab](https://modrinth.com/plugin/velocitab) (proxy only)
   - Customizes the tab list
-- [Velocircon](https://modrinth.com/plugin/velocircon)
+- [Velocircon](https://modrinth.com/plugin/velocircon) (proxy only)
   - RCON support for velocity
-- [Viaversion](https://modrinth.com/plugin/viaversion) + [Viabackwards](https://modrinth.com/plugin/viabackwards) + [Viarewind](https://modrinth.com/plugin/viarewind)
+- [Viaversion](https://modrinth.com/plugin/viaversion) + [Viabackwards](https://modrinth.com/plugin/viabackwards) + [Viarewind](https://modrinth.com/plugin/viarewind) (paper only)
   - Allows players from different client versions to join your server
-- [FabricProxy-Lite](https://modrinth.com/mod/fabricproxy-lite)
+- [FabricProxy-Lite](https://modrinth.com/mod/fabricproxy-lite) (fabric only)
   - Velocity forwarding support for fabric
