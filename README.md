@@ -38,6 +38,10 @@ Create this file in any directory as `docker-compose.yml`:
 ```yml
 services:
   minecraftmanager:
+    image: ghcr.io/trwy7/minecraftmanager:1.0.0
+    hostname: minecraftmanager
+    stop_signal: SIGINT
+    stop_grace_period: 60s # Enough time for the servers to stop
     ports:
       - 7843:7843 # HTTP
       - 25565:25565 # Minecraft Java
@@ -50,10 +54,6 @@ services:
       - SECRET_KEY=ChangeMeP13aseThisIsNotAGoodSecretKey
       - BASE_DOMAIN=mc.example.com # Optional
       - SERVER_OWNER=069a79f4-44e9-4726-a5be-fca90e38aaf5 # Optional
-    hostname: minecraftmanager
-    stop_signal: SIGINT
-    stop_grace_period: 60s
-    image: ghcr.io/trwy7/minecraftmanager:1.0.0
 
 volumes:
   servers:
