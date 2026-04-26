@@ -10,7 +10,9 @@
     <button class="run-command" onclick="runCommand()" hidden>RCON</button>
     <button onclick="showTab('console')" id="console-tab" hidden>Console</button>
     <button onclick="showTab('files')" id="files-tab">Files</button>
-    <button onclick="uploadFile()" id="upload-tab" hidden>Upload File</button>
+    <button onclick="showTab('backups')" id="backups-tab">Backups</button>
+    <button onclick="createBackup()" id="backup" hidden>Create backup</button>
+    <button onclick="uploadFile()" id="upload" hidden>Upload File</button>
     <button onclick="createDirectory()" id="create-folder" hidden>Create folder</button>
     <button class="delete-server" onclick="deleteServer()">Delete server</button>
 </div>
@@ -18,6 +20,9 @@
     <div class="server-console-inner">{{get_server_output(server)}}</div><input type="text" class="server-command-input" placeholder="Command" onkeydown="sendCommand(event)">
 </div>
 <div class="server-files" hidden>
+
+</div>
+<div class="server-backups" hidden>
 
 </div>
 {% endblock %}
@@ -166,17 +171,33 @@
     function showTab(tab) {
         if (tab === 'console') {
             document.querySelector(".server-console").hidden = false;
+            document.querySelector(".server-backups").hidden = true;
             document.querySelector(".server-files").hidden = true;
             document.getElementById("console-tab").hidden = true;
             document.getElementById("files-tab").hidden = false;
-            document.getElementById("upload-tab").hidden = true;
+            document.getElementById("backups-tab").hidden = false;
+            document.getElementById("upload").hidden = true;
+            document.getElementById("backup").hidden = true;
+            document.getElementById("create-folder").hidden = true;
+        } else if (tab === 'backups') {
+            document.querySelector(".server-console").hidden = true;
+            document.querySelector(".server-backups").hidden = false;
+            document.querySelector(".server-files").hidden = true;
+            document.getElementById("console-tab").hidden = false;
+            document.getElementById("backups-tab").hidden = true;
+            document.getElementById("files-tab").hidden = false;
+            document.getElementById("upload").hidden = true;
+            document.getElementById("backup").hidden = false;
             document.getElementById("create-folder").hidden = true;
         } else {
             document.querySelector(".server-console").hidden = true;
+            document.querySelector(".server-backups").hidden = true;
             document.querySelector(".server-files").hidden = false;
             document.getElementById("console-tab").hidden = false;
+            document.getElementById("backups-tab").hidden = false;
             document.getElementById("files-tab").hidden = true;
-            document.getElementById("upload-tab").hidden = false;
+            document.getElementById("upload").hidden = false;
+            document.getElementById("backup").hidden = true;
             document.getElementById("create-folder").hidden = false;
         }
     }
@@ -309,8 +330,71 @@
             }
         }
     }
+    function listBackups() {
+        fetch(`/server/${serverId}/backups`, {credentials: 'include'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                const bakDiv = document.querySelector(".server-backups");
+                bakDiv.innerHTML = "";
+                data.files.forEach(file => {
+                    const fileElement = document.createElement("div");
+                    fileElement.textContent = "🗃️ " + file.name;
+                    fileElement.classList.add("backup");
+                    // backup action buttons
+                    const dlButton = document.createElement("button");
+                    dlButton.textContent = "Download";
+                    dlButton.classList.add("rename-button");
+                    dlButton.onclick = (e) => {window.location.href = `/server/${serverId}/backups/${file.name}`};
+                    fileElement.appendChild(dlButton);
+                    const renameButton = document.createElement("button");
+                    renameButton.textContent = "Rename";
+                    renameButton.classList.add("rename-button");
+                    renameButton.onclick = (e) => {renameBackup(file.name)};
+                    fileElement.appendChild(renameButton);
+                    const restoreButton = document.createElement("button");
+                    restoreButton.textContent = "Restore";
+                    restoreButton.classList.add("rename-button");
+                    restoreButton.onclick = (e) => {restoreBackup(file.name)};
+                    fileElement.appendChild(restoreButton);
+                    const deleteButton = document.createElement("button");
+                    deleteButton.textContent = "Delete";
+                    deleteButton.classList.add("delete-button");
+                    deleteButton.onclick = (e) => {deleteBackup(file.name)};
+                    fileElement.appendChild(deleteButton);
+                    // add the element
+                    bakDiv.appendChild(fileElement);
+                });
+            })
+            .catch(error => {
+                alert('An error occurred loading backups: ' + error.message);
+            });
+    }
+    function createBackup() {
+        const bakName = prompt("Backup name (blank for current date):");
+        if (bakName === null) {
+            return
+        }
+        if (confirm("Are you sure you want to make a backup? The server will be stopped. Do not reload this page.")) {
+            fetch(`/server/${serverId}/backups`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({name: bakName}),
+            })
+            .then(response => location.reload())
+            .catch(error => {
+                alert('An error occurred: ' + error.message);
+            });
+        }
+    }
     function deleteServer() {
-        if (confirm("Are you sure you want to delete this server?")) {
+        if (confirm("Are you sure you want to delete this server? All backups will also be deleted.")) {
             fetch(`/server/${serverId}`, {
                 method: 'DELETE',
                 credentials: 'include'
@@ -331,5 +415,6 @@
         }
     }
     listDir("");
+    listBackups();
 </script>
 {% endblock %}

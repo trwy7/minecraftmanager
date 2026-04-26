@@ -1,9 +1,10 @@
 import os
 import shutil
 from flask import request, send_from_directory
-from app import app
+from app import app, require_login
 
 @app.route("/server/<int:server_id>/files/<path:filename>", methods=['GET', 'PUT', 'POST', "DELETE"])
+@require_login
 def handle_server_files(server_id, filename):
     server_dir = f"/servers/{str(server_id)}"
     file_path = os.path.join(server_dir, filename)
@@ -46,6 +47,7 @@ def handle_server_files(server_id, filename):
             return {'error': 'File not found'}, 404
 
 @app.route("/server/<int:server_id>/files/", methods=['GET'])
+@require_login
 def get_server_files(server_id):
     server_dir = f"/servers/{str(server_id)}"
     listing = [{

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Fixing permissions..."
-chown -R 1000:1000 /servers /data
+chown -R 1000:1000 /servers /data /backups
 
 echo "Starting user script..."
 exec sudo -E -u appuser /app/entrypoint.user.sh $@

@@ -10,6 +10,7 @@ services:
     volumes:
       - servers:/servers
       - data:/data
+      - backups:/backups
     hostname: minecraftmanager
     stop_signal: SIGINT
     env_file: ".env"
@@ -33,3 +34,4 @@ services:
 volumes:
   servers:
   data:
+  backups:

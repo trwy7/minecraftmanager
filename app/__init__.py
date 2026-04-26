@@ -1,4 +1,5 @@
 # pylint: disable=missing-function-docstring, missing-class-docstring, wrong-import-position, wrong-import-order
+import subprocess
 import logging
 from gevent import monkey, signal_handler
 monkey.patch_all()
@@ -320,6 +321,7 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
             raise Exception("Server already exists")
         shutil.rmtree(f"/servers/{sid}")
     os.mkdir(f"/servers/{sid}")
+    os.mkdir(f"/backups/{sid}")
     app.logger.info("Running setup script for server type %s...", software_type)
     cresp = os.system(f"cd /servers/{sid} && /app/serverconfigs/{software_type}/create.sh {sid} {version}")
     if cresp != 0:
@@ -340,10 +342,28 @@ def delete_server(server):
     del server_states[server.id]
     if os.path.exists(f"/servers/{server.id}"):
         shutil.rmtree(f"/servers/{server.id}")
+    if os.path.exists(f"/backups/{server.id}"):
+        shutil.rmtree(f"/backups/{server.id}")
     db.session.delete(server)
     db.session.commit()
     update_proxy_config(Server.query.filter_by(id=25565).first())
     app.logger.info("Deleted server %s...", server.name)
+
+def make_backup(server, name=""):
+    if not name.strip():
+        name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    app.logger.info("Creating backup for %s", server.name)
+    sstat = stop_server(server)
+    subprocess.run([
+        "tar",
+        "-czf",
+        f"/backups/{server.id}/{name}.tar.gz",
+        "."
+    ], check=True, cwd=f"/servers/{server.id}")
+    if sstat:
+        app.logger.debug("Starting server after backup...")
+        start_server(server)
+
 
 authenticated_clients = []
 def send_update(event, data):

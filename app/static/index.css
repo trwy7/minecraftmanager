@@ -89,10 +89,13 @@ main {
     border-radius: 4px;
     font-family: 'Courier New', Courier, monospace;
 }
-.directory, .file {
+.directory, .file, .backup {
     padding: 5px;
     border-bottom: 1px solid #555;
     cursor: pointer;
+}
+.backup {
+    border-bottom: 1px solid #00557c;
 }
 #server .server-console {
     height: 450px;

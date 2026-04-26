@@ -219,3 +219,4 @@ __marimo__/
 docker-compose.override.yml
 dservers/
 data/
+backups/
