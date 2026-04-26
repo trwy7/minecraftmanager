@@ -55,9 +55,9 @@ def verify_user():
     if not token:
         return
     try:
-        cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")['usr']
+        cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")
         if datetime.fromtimestamp(cusr['exp']) > datetime.now():
-            usr = get_user(cusr)
+            usr = get_user(cusr['usr'])
             if usr:
                 request.user = usr
     except jwt.exceptions.InvalidSignatureError:
