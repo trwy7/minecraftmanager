@@ -104,6 +104,12 @@ def create_user(uid, password):
     db.session.commit()
     return user
 
+def change_password(uid, password):
+    user = get_user(uid)
+    user.password = bcrypt.generate_password_hash(password).decode('utf-8')
+    db.session.commit()
+    return user
+
 def get_next_free_server_id():
     existing_ids = {server.id for server in Server.query.all()}
     for i in range(30001, 30100):

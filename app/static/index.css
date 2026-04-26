@@ -165,3 +165,6 @@ button.run-command {
 button.run-command:hover {
     background-color: #007b5e;
 }
+a {
+    color: #75d3ff;
+}

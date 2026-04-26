@@ -1,12 +1,12 @@
 {% extends "templates/base.html" %}
-{% block title %}Dashboard{% endblock %}
-{% block mainid %}dashboard{% endblock %}
+{% block title %}Users{% endblock %}
+{% block mainid %}users{% endblock %}
 {% block content %}
 <h1>Users</h1><button onclick="addUser()">Add user</button><br>
 <div id="users">
     {% for user in users %}
     <div class="user">
-        {{user.id}}<a href="/users/{{user.id}}">Edit</a><a href="/users/{{user.id}}/delete">Edit</a>
+        {{user.id}} <button onclick="changepwd('{{user.id}}')">Change password</button> <button onclick="deleteUser('{{user.id}}')">Delete</button>
     </div>
     {% endfor %}
 </div>
@@ -14,8 +14,16 @@
 {% block script %}
 <script>
     function addUser() {
-        const name = prompt();
+        const name = prompt("Username:");
         if (name === null) {
+            return
+        }
+        const pwd = prompt("Password:");
+        if (pwd === null) {
+            return
+        }
+        const c = confirm("Are you sure you want to create user " + name + "? They will have full access to everything in this instance.")
+        if (!c) {
             return
         }
         fetch('/adduser', {
@@ -23,9 +31,37 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({name: name}),
+            body: JSON.stringify({name: name, pwd: pwd}),
             credentials: 'include'
-        }) /* TODO: redirect to user page when done*/
+        }).then(r => {location.reload()})
+    }
+    function changepwd(user) {
+        const pwd = prompt();
+        if (pwd === null) {
+            return
+        }
+        fetch('/changepwd', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({user: user, pwd: pwd}),
+            credentials: 'include'
+        }).then(r => {location.reload()})
+    }
+    function deleteUser(user) {
+        const c = confirm("Are you sure you want to delete " + user)
+        if (!c) {
+            return
+        }
+        fetch('/deleteuser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({user: user}),
+            credentials: 'include'
+        }).then(r => {location.reload()})
     }
 </script>
 {% endblock %}
