@@ -110,6 +110,11 @@ def change_password(uid, password):
     db.session.commit()
     return user
 
+def delete_user(uid):
+    user = get_user(uid)
+    db.session.delete(user)
+    db.session.commit()
+
 def get_next_free_server_id():
     existing_ids = {server.id for server in Server.query.all()}
     for i in range(30001, 30100):
