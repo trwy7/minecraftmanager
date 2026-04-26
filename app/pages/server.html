@@ -378,7 +378,7 @@
         if (bakName === null) {
             return
         }
-        if (confirm("Are you sure you want to make a backup? The server will be stopped. Do not reload this page.")) {
+        if (confirm("Are you sure you want to make a backup? The server will be restarted if it is on. Do not reload this page.")) {
             fetch(`/server/${serverId}/backups`, {
                 method: 'POST',
                 credentials: 'include',
@@ -386,6 +386,47 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({name: bakName}),
+            })
+            .then(response => listBackups())
+            .catch(error => {
+                alert('An error occurred: ' + error.message);
+            });
+        }
+    }
+    function renameBackup(oldPath) {
+        const newPath = prompt("New name:", oldPath);
+        if (newPath) {
+            fetch(`/server/${serverId}/backups/${oldPath}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({new_name: newPath}),
+                credentials: 'include'
+            })
+            .then(response => listBackups())
+            .catch(error => {
+                alert('An error occurred: ' + error.message);
+            });
+        }
+    }
+    function deleteBackup(path) {
+        if (confirm(`Are you sure you want to delete ${path}?`)) {
+            fetch(`/server/${serverId}/backups/${path}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            })
+            .then(response => listBackups())
+            .catch(error => {
+                alert('An error occurred: ' + error.message);
+            });
+        }
+    }
+    function restoreBackup(path) {
+        if (confirm(`Are you sure you want to restore backup ${path}?`) && confirm(`Are you really sure you want to restore this backup? All current data will be deleted, and the server will be shut off. Do not reload this page, it will be done automatically.`)) {
+            fetch(`/server/${serverId}/backups/${path}/restore`, {
+                method: 'POST',
+                credentials: 'include'
             })
             .then(response => location.reload())
             .catch(error => {

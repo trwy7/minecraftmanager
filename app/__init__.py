@@ -1,4 +1,5 @@
 # pylint: disable=missing-function-docstring, missing-class-docstring, wrong-import-position, wrong-import-order
+import shutil
 import subprocess
 import logging
 from gevent import monkey, signal_handler
@@ -364,6 +365,19 @@ def make_backup(server, name=""):
         app.logger.debug("Starting server after backup...")
         start_server(server)
 
+def restore_backup(server, name):
+    # TODO: check port numbers to verify compatibility
+    app.logger.info("Restoring backup for %s: %s", server.name, name)
+    stop_server(server)
+    make_backup(server, "auto_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    shutil.rmtree(f"/servers/{server.id}")
+    os.mkdir(f"/servers/{server.id}")
+    subprocess.run([
+        "tar",
+        "-xzf",
+        f"/backups/{server.id}/{name}",
+        "."
+    ], check=True, cwd=f"/servers/{server.id}")
 
 authenticated_clients = []
 def send_update(event, data):

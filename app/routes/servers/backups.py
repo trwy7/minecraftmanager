@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 from flask import request, send_from_directory
-from app import app, require_login, Server, make_backup
+from app import app, require_login, Server, make_backup, restore_backup
 
 @app.route("/server/<int:server_id>/backups")
 @require_login
@@ -21,6 +21,14 @@ def make_server_backup(server_id):
     make_backup(server, name=request.json['name'])
     return "done"
 
+@app.route("/server/<int:server_id>/backups/<string:filename>/restore", methods=['POST'])
+@require_login
+def restore_server_backup(server_id, filename):
+    server = Server.query.get(server_id)
+    if not server:
+        return {'error': 'Server not found'}, 404
+    restore_backup(server, name=filename)
+    return "done"
 
 @app.route("/server/<int:server_id>/backups/<string:filename>", methods=['GET', 'PUT', "DELETE"])
 @require_login
