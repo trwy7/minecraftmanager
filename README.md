@@ -95,6 +95,10 @@ A few plugins are automatically installed, here are the most notable. You can de
   - Automatically gives you the `*` permission on each server you create
 - [Simple voice chat](https://modrinth.com/plugin/simple-voice-chat)
   - Proximity chat for minecraft
+  - To get this to work, you need to give players the `voicechat.speak`, `voicechat.listen`, and `voicechat.groups` permission to true. To do this, run:
+    - `/luckperms group default permission set voicechat.speak true`
+    - `/luckperms group default permission set voicechat.listen true`
+    - `/luckperms group default permission set voicechat.groups true`
 - [Velocitab](https://modrinth.com/plugin/velocitab) (proxy only)
   - Customizes the tab list
 - [Velocircon](https://modrinth.com/plugin/velocircon) (proxy only)

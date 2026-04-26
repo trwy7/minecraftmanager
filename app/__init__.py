@@ -257,6 +257,7 @@ def run_server(server):
                                 send_stdin(server, "lp user " + app.config['SERVER_OWNER'] + " permission set luckperms.* true")
                                 send_stdin(server, "lp user " + app.config['SERVER_OWNER'] + " permission set minecraft.command.op true")
                                 send_stdin(server, "lp user " + app.config['SERVER_OWNER'] + " permission set minecraft.command.deop true")
+                                send_stdin(server, "lp user " + app.config['SERVER_OWNER'] + " permission set voicechat.admin true")
                         send_update("server_fully_started", {"server_id": server.id})
                 f.write(line)
                 f.flush()
