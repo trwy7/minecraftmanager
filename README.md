@@ -40,9 +40,9 @@ services:
   minecraftmanager:
     ports:
       - 7843:7843 # HTTP
-      - 25565:25565 # Minecraft
-      - 25565:25565/udp # Minecraft
-      - 19132:19132/udp # Bedrock/Geyser
+      - 25565:25565 # Minecraft Java
+      - 25565:25565/udp # Minecraft Java
+      - 19132:19132/udp # Minecraft Bedrock (via geysermc)
     volumes:
       - servers:/servers
       - data:/data
@@ -54,14 +54,17 @@ services:
     stop_signal: SIGINT
     stop_grace_period: 60s
     image: ghcr.io/trwy7/minecraftmanager:1.0.0
+
 volumes:
   servers:
   data:
 ```
 
-Replace `ChangeMeP13aseThisIsNotAGoodSecretKey` with any alphanumeric string larger than 32 characters
-Replace `mc.example.com` with the domain that players can join from, this assumes you have a wildcard of your domain (`*.domain.tld`) that is also pointed at this server, you may remove this line if you do not have a domain, can't setup a wildcard, or want to force players to go through the lobby server to join.
-Replace `069a79f4-44e9-4726-a5be-fca90e38aaf5` with your own Minecraft UUID, or remove it
+- Replace `ChangeMeP13aseThisIsNotAGoodSecretKey` with any random alphanumeric string larger than 32 characters.
+- Replace `mc.example.com` with the domain that players can join from, this assumes you have a wildcard of your domain (`*.domain.tld`) that is also pointed at this server, you may remove this line if you do not have a domain, can't setup a wildcard, or want to force players to go through the lobby server to join.
+- Replace `069a79f4-44e9-4726-a5be-fca90e38aaf5` with your own full Minecraft UUID, or remove it if you do not have a minecraft java account
+  - To get your UUID, go to [NameMC](https://namemc.com/) and search your Minecraft username
+  - If you set this, you will automatically be given `/op`, `/deop`, and luckperms admin automatically on each server
 
 After setting everything how you want, run `docker-compose up -d`
 When starting MCM for the first time, run `docker compose logs | grep password` to find the admin account password
