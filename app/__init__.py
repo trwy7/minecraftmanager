@@ -14,6 +14,7 @@ import re
 import toml
 import jwt
 import signal
+from datetime import datetime, timedelta
 from flask import Flask, request, redirect
 from flask_limiter import Limiter
 from flask_socketio import SocketIO, emit
@@ -55,9 +56,10 @@ def verify_user():
         return
     try:
         cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")['usr']
-        usr = get_user(cusr)
-        if usr:
-            request.user = usr
+        if datetime.fromtimestamp(cusr['exp']) > datetime.now():
+            usr = get_user(cusr)
+            if usr:
+                request.user = usr
     except jwt.exceptions.InvalidSignatureError:
         pass
 
@@ -354,7 +356,7 @@ class User(db.Model):
     id = db.Column(db.String(255), primary_key=True, unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     def generate_token(self):
-        return jwt.encode({"usr": self.id}, app.config['SECRET_KEY'], algorithm="HS256")
+        return jwt.encode({"usr": self.id, "exp": int((datetime.now() + timedelta(weeks=1)).timestamp())}, app.config['SECRET_KEY'], algorithm="HS256")
 
 class Server(db.Model):
     # TODO: File browser
@@ -437,12 +439,15 @@ def handle_connect(auth):
         app.logger.debug("No auth token provided, rejecting socket connection")
         return False
     try:
-        cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")['usr']
-        usr = get_user(cusr)
+        cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")
+        if datetime.fromtimestamp(cusr['exp']) < datetime.now():
+            app.logger.debug("Token has expired, rejecting socket connection")
+            return False
+        usr = get_user(cusr['usr'])
         if not usr:
             app.logger.debug("Invalid user in token, rejecting socket connection")
             return False
-        app.logger.info(f"User {usr.id} connected via SocketIO")
+        app.logger.info(f"User {usr.id} connected via socket")
         authenticated_clients.append(request.sid)
         socketio.emit("auth_success", {"message": "Authenticated successfully"}, to=request.sid)
     except jwt.exceptions.InvalidSignatureError:

@@ -20,9 +20,9 @@ def handle_restart_server(data):
     server_id = data.get('server_id')
     server = Server.query.get(server_id)
     if server:
-        print(f"Restarting server {server.name}...")
+        app.logger.info(f"Restarting server {server.name}...")
         stop_server(server)
-        print(f"Server {server.name} stopped starting back up...")
+        app.logger.debug(f"Server {server.name} has stopped, starting it back up...")
         start_server(server)
 
 @socketio.on('send_command')
