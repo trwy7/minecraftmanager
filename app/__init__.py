@@ -287,7 +287,7 @@ def stop_server(server):
     """Stop the server gracefully, killing it if necessary."""
     sid = server.id
     proc = server_states.get(sid, {}).get("proc")
-    app.logger.info(f"Stopping server {server.name} with status {proc}...")
+    app.logger.info(f"Stopping server {server.name}...")
     if not is_server_running(server):
         app.logger.warning(f"Cant stop server: {server.name} is not running.")
         return None
