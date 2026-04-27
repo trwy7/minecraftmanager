@@ -16,7 +16,7 @@ Simple Minecraft Manager is a server manager for Minecraft. This is designed fro
 The java minecraft server has high memory requirements. By default, 4 GB of ram is required for the proxy and papermc lobby, but increases with plugins/mods/quantity of servers.
 You must also agree to the [Minecraft EULA](https://aka.ms/MinecraftEULA)
 
-You need docker and docker-compose, [learn how to install the Docker Engine](https://docs.docker.com/engine/install/) and [learn how to install the Docker Compose plugin](https://docs.docker.com/compose/install/linux/).
+You need docker and docker-compose, [learn how to install the Docker Engine](https://docs.docker.com/engine/install/) and [learn how to install the Docker Compose plugin](https://docs.docker.com/compose/install/linux/), you may want to give your user the `docker` group, if not, you may need to run some of the below commands with sudo.
 
 - Create a directory called `mcm` (or whatever you want).
 - Create this file in the directory as `docker-compose.yml`:
@@ -36,6 +36,7 @@ services:
     volumes:
       - servers:/servers
       - data:/data
+      - backups:/backups
     environment:
       - SECRET_KEY=ChangeMeP13aseThisIsNotAGoodSecretKey
       - BASE_DOMAIN=mc.example.com # Optional
