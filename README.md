@@ -45,6 +45,7 @@ services:
 volumes:
   servers:
   data:
+  backups:
 ```
 
 - Replace `ChangeMeP13aseThisIsNotAGoodSecretKey` with any random alphanumeric string larger than 32 characters.
