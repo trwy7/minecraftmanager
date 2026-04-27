@@ -16,29 +16,14 @@ Simple Minecraft Manager is a server manager for Minecraft. This is designed fro
 The java minecraft server has high memory requirements. By default, 4 GB of ram is required for the proxy and papermc lobby, but increases with plugins/mods/quantity of servers.
 You must also agree to the [Minecraft EULA](https://aka.ms/MinecraftEULA)
 
-## How to use
-
-To run, you must install docker, you can [learn how to install the Docker Engine](https://docs.docker.com/engine/install/)
-
-## Quick setup
-
-Use this command:
-
-```sh
-docker run -p 7843:7843 -p 25565:25565 -p 25565:25565/udp -p 19132:19132/udp -v mcm_servers:/servers -v mcm_data:/data -h minecraftmanager --stop-signal SIGINT --stop-timeout 60 ghcr.io/trwy7/minecraftmanager:1.0.0
-```
-
-then wait 1-2 minutes (depending on your internet connection and computer speed) and go to localhost:7843 in your browser. In your console, you should see `Created initial 'admin' user with password`, and log in with the password it gives you
-
-## Full setup
-
-This setup requires docker-compose, [learn how to install the Docker Compose plugin](https://docs.docker.com/compose/install/linux/)
-Create this file in any directory as `docker-compose.yml`:
+You need docker and docker-compose, [learn how to install the Docker Engine](https://docs.docker.com/engine/install/) and [learn how to install the Docker Compose plugin](https://docs.docker.com/compose/install/linux/).
+Create a directory called `mcm` (or whatever you want)
+Create this file in the directory as `docker-compose.yml`:
 
 ```yml
 services:
   minecraftmanager:
-    image: ghcr.io/trwy7/minecraftmanager:1.0.0
+    image: ghcr.io/trwy7/minecraftmanager:1.1.0
     hostname: minecraftmanager
     stop_signal: SIGINT
     stop_grace_period: 60s # Enough time for the servers to stop
@@ -66,8 +51,8 @@ volumes:
   - To get your UUID, go to [NameMC](https://namemc.com/) and search your Minecraft username
   - If you set this, you will automatically be given `/op`, `/deop`, and luckperms admin automatically on each server
 
-After setting everything how you want, run `docker-compose up -d`
-When starting MCM for the first time, run `docker compose logs | grep password` to find the admin account password
+After setting everything how you want, run `docker-compose up -d` (within the directory)
+When starting MCM for the first time, run `docker compose logs | grep password` (also within the directory) to find the admin account password
 
 ## First run
 
