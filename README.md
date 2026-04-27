@@ -17,8 +17,9 @@ The java minecraft server has high memory requirements. By default, 4 GB of ram 
 You must also agree to the [Minecraft EULA](https://aka.ms/MinecraftEULA)
 
 You need docker and docker-compose, [learn how to install the Docker Engine](https://docs.docker.com/engine/install/) and [learn how to install the Docker Compose plugin](https://docs.docker.com/compose/install/linux/).
-Create a directory called `mcm` (or whatever you want)
-Create this file in the directory as `docker-compose.yml`:
+
+- Create a directory called `mcm` (or whatever you want).
+- Create this file in the directory as `docker-compose.yml`:
 
 ```yml
 services:
