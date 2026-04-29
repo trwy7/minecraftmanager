@@ -1,0 +1,18 @@
+{
+    "proxy": {
+        "name": "Proxy",
+        "stop_cmd": "shutdown"
+    },
+    "paper": {
+        "name": "Paper",
+        "stop_cmd": "stop"
+    },
+    "fabric": {
+        "name": "Fabric",
+        "stop_cmd": "stop"
+    },
+    "pumpkin": {
+        "name": "Pumpkin (unstable)",
+        "stop_cmd": "stop"
+    }
+}
