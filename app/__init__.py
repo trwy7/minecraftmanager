@@ -14,6 +14,7 @@ import subprocess
 import time
 import re
 import toml
+import json
 import jwt
 import signal
 from datetime import datetime, timedelta
@@ -35,6 +36,9 @@ if os.environ.get('ENV_MODE') == "dev":
     app.config['TEMPLATES_AUTO_RELOAD'] = True
 else:
     app.logger.setLevel(logging.INFO)
+
+with open("/app/serverconfigs/servertypes.json", "r") as f:
+    servertypes = json.load(f)
 
 db = SQLAlchemy(app)
 limiter = Limiter(app=app, key_func=lambda: request.remote_addr, default_limits=["100/minute", "5/second"], storage_uri="memory://")
@@ -295,7 +299,7 @@ def stop_server(server):
         app.logger.warning(f"Cant stop server: {server.name} is not running.")
         return None
     app.logger.debug(f"Sending stop command to server {server.name}...")
-    send_stdin(server, server.stop_cmd)
+    send_stdin(server, servertypes[server.cscript]["stop_cmd"])
     if proc:
         proc.wait(timeout=60)
     socketio.sleep(1)
@@ -310,7 +314,7 @@ def stop_server(server):
 
 # End AI disclosure
 
-def create_server(sid, name, stop_cmd, stype, software_type, version="latest", force_create=False):
+def create_server(sid, name, stype, software_type, version="latest", force_create=False):
     # Name has to be lowercase letters
     name = name.strip().lower()
     # Replace spaces with dashes
@@ -319,7 +323,7 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
     name = "".join(c for c in name if (c.isalnum() and not c.isdigit()) or c == "-")
     if os.path.exists(f"/servers/{sid}"):
         if not force_create:
-            raise Exception("Server already exists")
+            raise Exception("Server directory already exists")
         shutil.rmtree(f"/servers/{sid}")
     os.mkdir(f"/servers/{sid}")
     os.mkdir(f"/backups/{sid}")
@@ -328,7 +332,7 @@ def create_server(sid, name, stop_cmd, stype, software_type, version="latest", f
     if cresp != 0:
         raise Exception("Failed to create server")
     app.logger.info("Server created. Setting up proxy...")
-    server = Server(id=sid, name=name, stop_cmd=stop_cmd, type=stype, cscript=software_type)
+    server = Server(id=sid, name=name, type=stype, cscript=software_type)
     db.session.add(server)
     db.session.commit()
     update_proxy_config(Server.query.filter_by(id=25565).first())
@@ -394,10 +398,9 @@ class User(db.Model):
         return jwt.encode({"usr": self.id, "exp": int((datetime.now() + timedelta(weeks=1)).timestamp())}, app.config['SECRET_KEY'], algorithm="HS256")
 
 class Server(db.Model):
-    # TODO: File browser
+    # TODO: Add a reset function that deletes all files and reinstalls the server, keeping the same ID, for the proxy and lobby servers which can't be easily reset.
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
     name = db.Column(db.String(30), unique=True, nullable=False)
-    stop_cmd = db.Column(db.String(30), nullable=False)
     type = db.Column(db.String(5), nullable=False)
     cscript = db.Column(db.String(10), nullable=True)
     thread = None
@@ -413,7 +416,6 @@ with app.app_context():
         proxy = create_server(
             25565,
             "proxy",
-            "shutdown",
             "proxy",
             "proxy",
             "3.5.0-SNAPSHOT",
@@ -422,7 +424,6 @@ with app.app_context():
         create_server(
             30000,
             "lobby",
-            "stop",
             "lobby",
             "paper",
             "1.21.10",
