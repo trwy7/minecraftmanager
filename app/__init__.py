@@ -261,6 +261,11 @@ def run_server(server):
                                 send_stdin(server, "lp user " + app.config['SERVER_OWNER'] + " permission set minecraft.command.deop true")
                                 send_stdin(server, "lp user " + app.config['SERVER_OWNER'] + " permission set voicechat.admin true")
                         send_update("server_fully_started", {"server_id": server.id})
+                    elif re.search(rb"Server is now running", line):
+                        server_states.setdefault(sid, {})["fully_started"] = True
+                        if app.config['SERVER_OWNER']:
+                            send_stdin(server, "op " + app.config['SERVER_OWNER'])
+                        send_update("server_fully_started", {"server_id": server.id})
                 f.write(line)
                 f.flush()
             f.write(b"[mcm] Server process ended.\n")
