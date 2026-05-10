@@ -30,6 +30,9 @@ app = Flask(__name__, template_folder="pages", static_folder="static")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/db.sqlite3'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "ChangeM3P13ase")
 app.config['SERVER_OWNER'] = os.environ.get('SERVER_OWNER')
+app.config["PROXIED_AUTH_HEADER"] = os.environ.get("PROXIED_AUTH_HEADER")
+if app.config["PROXIED_AUTH_HEADER"]:
+    app.logger.warning("Users are being authenticated via a reverse proxy, if you do not have one, please remove PROXIED_AUTH_HEADER")
 if os.environ.get('ENV_MODE') == "dev":
     app.logger.setLevel(logging.DEBUG)
     app.logger.warning("Running in dev mode, you should disable this in production to improve performance.")
@@ -48,6 +51,19 @@ bcrypt = Bcrypt(app)
 print("\u001b[31mThis app requires that you agree to the Minecraft EULA. If you do not, please stop this container and remove it from your system.\u001b[0m")
 print("You may view it here: https://aka.ms/MinecraftEULA")
 
+def check_pauth():
+    if app.config["PROXIED_AUTH_HEADER"]:
+        proxyuname = request.headers.get(app.config["PROXIED_AUTH_HEADER"])
+        if proxyuname:
+            app.logger.debug(f"Username {proxyuname} in headers")
+            usr = get_user(proxyuname)
+            if usr:
+                app.logger.debug(f"Username {proxyuname} found")
+                token = usr.generate_token()
+                resp = redirect("/dashboard")
+                resp.set_cookie("token", token, samesite="Lax")
+                return resp
+
 @app.before_request
 def verify_user():
     auth = request.headers.get("Authorization")
@@ -59,15 +75,19 @@ def verify_user():
     if not token:
         token = request.args.get("token")
     if not token:
-        return
+        return check_pauth()
     try:
         cusr = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")
         if datetime.fromtimestamp(cusr['exp']) > datetime.now():
+            app.logger.debug(f"Looking for {cusr['usr']} from jwt")
             usr = get_user(cusr['usr'])
             if usr:
+                app.logger.debug(f"Found {cusr['usr']} from jwt")
                 request.user = usr
+                return
     except jwt.exceptions.InvalidSignatureError:
         pass
+    return check_pauth()
 
 @app.after_request
 def prevent_caching(response):

@@ -33,7 +33,14 @@
             },
             body: JSON.stringify({name: name, pwd: pwd}),
             credentials: 'include'
-        }).then(r => {location.reload()})
+        }).then(response => {
+            if (response.ok) {
+                // Reloads the current page
+                window.location.reload();
+            } else {
+                console.error('Server returned an error');
+            }
+        })
     }
     function changepwd(user) {
         const pwd = prompt("New password for " + user + ":");
