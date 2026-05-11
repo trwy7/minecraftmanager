@@ -11,14 +11,13 @@ EOF
 
 chmod +x run.sh
 
-mkdir -p config
 RCON_PORT=$(($1 + 1000))
-cat > config/configuration.toml <<EOF
+cat > pumpkin.toml <<EOF
 java_edition_address = "0.0.0.0:$1"
 bedrock_edition = false
 EOF
 
-cat > config/features.toml <<EOF
+cat > pumpkin.toml <<EOF
 [networking.proxy]
 enabled = true
 
