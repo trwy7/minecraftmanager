@@ -15,9 +15,7 @@ RCON_PORT=$(($1 + 1000))
 cat > pumpkin.toml <<EOF
 java_edition_address = "0.0.0.0:$1"
 bedrock_edition = false
-EOF
 
-cat > pumpkin.toml <<EOF
 [networking.proxy]
 enabled = true
 

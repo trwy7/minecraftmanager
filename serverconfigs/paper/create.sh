@@ -100,10 +100,10 @@ if [ -n "$MINECRAFT_VERSION" ]; then
     if [ "$MAJOR" -eq 1 ] && [ "$MINOR" -lt 17 ]; then
       JAVA_VERSION="8"
     else
-      JAVA_VERSION="21"
+      JAVA_VERSION="25"
     fi
   else
-    JAVA_VERSION="21"
+    JAVA_VERSION="25"
   fi
 fi
 cat > run.sh <<EOF
