@@ -214,6 +214,7 @@ def update_proxy_config(server):
         app.logger.error(f"No velocity.toml found for server {server.name}, skipping proxy config update.")
 
 def update_proxy_mappings():
+    # TODO: make this do something
     pass
 
 def send_stdin(server, command):
@@ -245,21 +246,21 @@ def is_server_running(server):
     proc = server_states.get(sid, {}).get("proc")
     return proc is not None and proc.poll() is None
 
-def run_server(server, command=None):
+def run_server(server, command: list[str] | None = None):
     """Run the given server and stream its stdout to the server's output.log."""
     sid = server.id
     if command is None:
-        cmd = f"/servers/{sid}/run.sh"
+        cmd = [f"/servers/{sid}/run.sh"]
+        if not os.path.exists(cmd[0]):
+            app.logger.error(f"Run command {cmd} does not exist for server {server.name}")
+            send_update("server_output", {"server_id": server.id, "output": f"Run command {cmd} not found. Server cannot be started.\n"})
+            return
     else:
         cmd = command
     cwd = f"/servers/{sid}"
-    if not os.path.exists(cmd):
-        app.logger.error(f"Run command {cmd} does not exist for server {server.name}")
-        send_update("server_output", {"server_id": server.id, "output": f"Run command {cmd} not found. Server cannot be started.\n"})
-        return
     # Run without a shell to ensure stdout is captured correctly
     with subprocess.Popen(
-        [cmd],
+        cmd,
         cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -386,12 +387,18 @@ def make_backup(server, name=""):
         name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     app.logger.info("Creating backup for %s", server.name)
     sstat = stop_server(server)
-    subprocess.run([
+    # subprocess.run([
+    #     "tar",
+    #     "-czf",
+    #     f"/backups/{server.id}/{name}.tar.gz",
+    #     "."
+    # ], check=True, cwd=f"/servers/{server.id}")
+    run_server(server, [
         "tar",
-        "-czf",
+        "-cvzf",
         f"/backups/{server.id}/{name}.tar.gz",
         "."
-    ], check=True, cwd=f"/servers/{server.id}")
+    ])
     if sstat:
         app.logger.debug("Starting server after backup...")
         start_server(server)

@@ -1,7 +1,6 @@
-from datetime import datetime
 import os
 from flask import request, send_from_directory
-from app import app, require_login, Server, make_backup, restore_backup
+from app import app, require_login, Server, make_backup, restore_backup, socketio
 
 @app.route("/server/<int:server_id>/backups")
 @require_login
@@ -12,14 +11,12 @@ def get_server_backups(server_id):
     } for x in os.listdir(server_dir)]
     return {'files': listing}, 200
 
-@app.route("/server/<int:server_id>/backups", methods=['POST'])
-@require_login
-def make_server_backup(server_id):
-    server = Server.query.get(server_id)
+@socketio.on('create_backup')
+def make_server_backup(data):
+    server = Server.query.get(data.get('server_id'))
     if not server:
-        return {'error': 'Server not found'}, 404
-    make_backup(server, name=request.json['name'])
-    return "done"
+        return
+    make_backup(server, name=data.get('name'))
 
 @app.route("/server/<int:server_id>/backups/<string:filename>/restore", methods=['POST'])
 @require_login
