@@ -6,9 +6,9 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-FROM eclipse-temurin:8-jre AS java8
-FROM eclipse-temurin:17-jre AS java17
-FROM eclipse-temurin:21-jre AS java21
+FROM eclipse-temurin:25-jre AS java8
+FROM eclipse-temurin:25-jre AS java17
+FROM eclipse-temurin:25-jre AS java21
 FROM ghcr.io/astral-sh/uv:0.11.6 AS pyuv
 
 FROM python:3.13.1-slim AS base
