@@ -6,6 +6,7 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
+# TODO: Lock these to a specific java version and have dependabot update these
 FROM eclipse-temurin:8-jre AS java8
 FROM eclipse-temurin:17-jre AS java17
 FROM eclipse-temurin:21-jre AS java21

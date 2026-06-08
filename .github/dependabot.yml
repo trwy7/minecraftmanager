@@ -5,7 +5,6 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "astral-sh/uv"
       - dependency-name: "python"
       - dependency-name: "eclipse-temurin"
         update-types: ["version-update:semver-major"]
