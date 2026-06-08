@@ -9,9 +9,10 @@
 FROM eclipse-temurin:8-jre AS java8
 FROM eclipse-temurin:17-jre AS java17
 FROM eclipse-temurin:21-jre AS java21
+FROM ghcr.io/astral-sh/uv:0.11.6 AS pyuv
 
-FROM python:3.13.1-slim as base
-COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /uvx /bin/
+FROM python:3.13.1-slim AS base
+COPY --from=pyuv /uv /uvx /bin/
 
 # Disable development dependencies
 ENV UV_NO_DEV=1
