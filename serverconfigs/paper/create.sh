@@ -100,14 +100,14 @@ if [ -n "$MINECRAFT_VERSION" ]; then
     if [ "$MAJOR" -eq 1 ] && [ "$MINOR" -lt 17 ]; then
       JAVA_VERSION="8"
     else
-      JAVA_VERSION="21"
+      JAVA_VERSION="25"
     fi
   else
-    JAVA_VERSION="21"
+    JAVA_VERSION="25"
   fi
 fi
 cat > run.sh <<EOF
 #!/usr/bin/env sh
-java$JAVA_VERSION -Xms1024M -Xmx2048M -jar server.jar nogui
+java$JAVA_VERSION -Xms1024M -Xmx2048M -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:+ParallelRefProcEnabled -XX:+PerfDisableSharedMem -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1HeapRegionSize=8M -XX:G1HeapWastePercent=5 -XX:G1MaxNewSizePercent=40 -XX:G1MixedGCCountTarget=4 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1NewSizePercent=30 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:G1ReservePercent=20 -XX:InitiatingHeapOccupancyPercent=15 -XX:MaxGCPauseMillis=200 -XX:MaxTenuringThreshold=1 -XX:SurvivorRatio=32 -jar server.jar nogui
 EOF
 chmod +x run.sh

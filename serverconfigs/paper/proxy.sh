@@ -16,7 +16,6 @@ cat > config/paper-global.yml <<EOF
 proxies:
   velocity:
     enabled: true
-    online-mode: true
     secret: '$FORWARD_SECRET'
 EOF
 

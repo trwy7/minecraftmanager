@@ -10,6 +10,7 @@
 FROM eclipse-temurin:8-jre AS java8
 FROM eclipse-temurin:17-jre AS java17
 FROM eclipse-temurin:21-jre AS java21
+FROM eclipse-temurin:25-jre AS java25
 FROM ghcr.io/astral-sh/uv:0.11.6 AS pyuv
 
 FROM python:3.13.1-slim AS base
@@ -48,11 +49,13 @@ RUN mkdir -p /usr/lib/jvm
 COPY --from=java8 /opt/java/openjdk /usr/lib/jvm/java-8-temurin
 COPY --from=java17 /opt/java/openjdk /usr/lib/jvm/java-17-temurin
 COPY --from=java21 /opt/java/openjdk /usr/lib/jvm/java-21-temurin
+COPY --from=java25 /opt/java/openjdk /usr/lib/jvm/java-25-temurin
 
 # Alias java
 RUN ln -s /usr/lib/jvm/java-8-temurin/bin/java /usr/bin/java8 && \
     ln -s /usr/lib/jvm/java-17-temurin/bin/java /usr/bin/java17 && \
-    ln -s /usr/lib/jvm/java-21-temurin/bin/java /usr/bin/java21
+    ln -s /usr/lib/jvm/java-21-temurin/bin/java /usr/bin/java21 && \
+    ln -s /usr/lib/jvm/java-25-temurin/bin/java /usr/bin/java25
 
 # Make sure they work
 RUN java8 -version

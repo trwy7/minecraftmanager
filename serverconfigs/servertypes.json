@@ -10,5 +10,9 @@
     "fabric": {
         "name": "Fabric",
         "stop_cmd": "stop"
+    },
+    "pumpkin": {
+        "name": "Pumpkin (unstable)",
+        "stop_cmd": "stop"
     }
 }
