@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "python"
+      - dependency-name: "eclipse-temurin"
+        update-types: ["version-update:semver-major"]
